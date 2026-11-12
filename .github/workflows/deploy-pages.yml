@@ -35,9 +35,11 @@ jobs:
           cp app/static/index.html dist/index.html
           cp -r app/static/css dist/css
           cp -r app/static/js dist/js
+          cp -r app/static/assets dist/assets
           # Aggiorna i percorsi degli asset per l'hosting statico su GitHub Pages
           sed -i 's|/static/css/|css/|g' dist/index.html
           sed -i 's|/static/js/|js/|g' dist/index.html
+          sed -i 's|/static/assets/|assets/|g' dist/index.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

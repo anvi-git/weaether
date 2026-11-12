@@ -3,7 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MeteoVision - Previsioni Meteo, Qualità dell'Aria & Dati Storici</title>
+  <title>weaether - Previsioni Meteo, Qualità dell'Aria & Dati Storici</title>
+  
+  <!-- Favicon per PC, Mac e Smartphone (iOS & Android) -->
+  <link rel="icon" type="image/x-icon" href="/static/assets/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/assets/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/assets/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/assets/apple-touch-icon.png">
+  <link rel="manifest" href="/static/assets/manifest.json">
+  <meta name="theme-color" content="#2690fd">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="weaether">
   
   <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,11 +33,11 @@
           },
           colors: {
             brand: {
-              50: '#f0f9ff',
-              100: '#e0f2fe',
-              500: '#0ea5e9',
-              600: '#0284c7',
-              700: '#0369a1',
+              blue: '#2690fd',
+              'blue-hover': '#0d74e3',
+              yellow: '#f2ff00',
+              'yellow-hover': '#d9e500',
+              dark: '#071126',
             }
           }
         }
@@ -43,36 +54,34 @@
   <!-- Custom Styles -->
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
-<body class="min-h-full bg-slate-950 text-slate-100 font-sans selection:bg-sky-500 selection:text-white flex flex-col transition-colors duration-500">
+<body class="min-h-full bg-slate-950 text-slate-100 font-sans selection:bg-[#f2ff00] selection:text-[#071126] flex flex-col transition-colors duration-500">
 
   <!-- Sfondo dinamico in base alle condizioni meteo -->
-  <div id="weather-bg" class="fixed inset-0 pointer-events-none -z-10 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 opacity-90 transition-all duration-1000"></div>
+  <div id="weather-bg" class="fixed inset-0 pointer-events-none -z-10 bg-gradient-to-br from-[#071126] via-[#0d234a] to-slate-950 opacity-90 transition-all duration-1000"></div>
 
-  <!-- Effetti ambientali soffusi -->
-  <div class="fixed top-0 left-1/4 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
-  <div class="fixed bottom-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <!-- Effetti ambientali soffusi con i colori ufficiali del logo -->
+  <div class="fixed top-0 left-1/4 w-96 h-96 bg-[#2690fd]/15 rounded-full blur-3xl pointer-events-none -z-10"></div>
+  <div class="fixed bottom-0 right-1/4 w-96 h-96 bg-[#f2ff00]/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
-  <!-- Barra di avanzamento aggiornamento in background (non invasiva) -->
-  <div id="updating-indicator" class="fixed top-0 left-0 right-0 h-1 bg-sky-400 z-50 transform -translate-y-full transition-transform duration-300">
-    <div class="w-full h-full bg-white/40 animate-pulse"></div>
+  <!-- Barra di avanzamento aggiornamento in background con colore brand -->
+  <div id="updating-indicator" class="fixed top-0 left-0 right-0 h-1 bg-[#2690fd] z-50 transform -translate-y-full transition-transform duration-300">
+    <div class="w-full h-full bg-[#f2ff00] animate-pulse"></div>
   </div>
 
   <!-- Header principale -->
-  <header class="sticky top-0 z-40 backdrop-blur-md bg-slate-950/80 border-b border-white/10 px-4 py-3 sm:px-6 lg:px-8">
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-[#071126]/85 border-b border-white/10 px-4 py-3 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3">
       
-      <!-- Logo e controlli rapidi -->
+      <!-- Logo Ufficiale e Branding -->
       <div class="flex items-center justify-between">
-        <a href="#" class="flex items-center gap-2.5 group" aria-label="MeteoVision Home">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-400 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-500/25 group-hover:scale-105 transition-transform">
-            <i data-lucide="cloud-sun" class="w-6 h-6 text-white" aria-hidden="true"></i>
-          </div>
+        <a href="#" class="flex items-center gap-3 group" aria-label="weaether Home">
+          <img src="/static/assets/logo.png" alt="weaether Logo" class="w-11 h-11 rounded-xl shadow-lg border border-[#2690fd]/40 group-hover:scale-105 transition-transform shrink-0 object-cover">
           <div>
-            <div class="font-bold text-lg leading-tight tracking-tight flex items-center gap-1.5">
-              <span>Meteo<span class="text-sky-400">Vision</span></span>
-              <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-white/10 text-slate-300 border border-white/10" id="header-data-badge">Previsioni orarie</span>
+            <div class="font-bold text-xl leading-tight tracking-tight flex items-center gap-1.5">
+              <span class="text-white font-extrabold tracking-tight">wea<span class="text-[#f2ff00]">ether</span></span>
+              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#f2ff00]/15 text-[#f2ff00] border border-[#f2ff00]/30" id="header-data-badge">Live</span>
             </div>
-            <p class="text-xs text-slate-400 hidden sm:block">Previsioni meteorologiche e qualità dell'aria</p>
+            <p class="text-xs text-slate-400 hidden sm:block">Previsioni meteo & qualità dell'aria</p>
           </div>
         </a>
 
@@ -80,13 +89,13 @@
         <div class="flex items-center gap-2">
           <!-- Pulsante Geolocalizzazione -->
           <button id="btn-geolocation" type="button" title="Rileva la mia posizione attuale tramite GPS" aria-label="Rileva la mia posizione attuale tramite GPS" class="mobile-touch-target px-3 py-2 rounded-xl glass-card interactive-control flex items-center gap-1.5 text-xs font-medium text-slate-200">
-            <i data-lucide="map-pin" class="w-4 h-4 text-sky-400" aria-hidden="true"></i>
+            <i data-lucide="map-pin" class="w-4 h-4 text-[#f2ff00]" aria-hidden="true"></i>
             <span class="hidden sm:inline">Mia Posizione</span>
           </button>
 
           <!-- Selettore Unità (°C / °F) -->
           <div class="flex items-center rounded-xl glass-card p-0.5 border border-white/10 text-xs font-semibold" role="group" aria-label="Seleziona unità di temperatura">
-            <button id="unit-c" type="button" aria-pressed="true" class="mobile-touch-target px-2.5 py-1.5 rounded-lg bg-sky-500 text-white transition-all shadow-sm">°C</button>
+            <button id="unit-c" type="button" aria-pressed="true" class="mobile-touch-target px-2.5 py-1.5 rounded-lg bg-[#2690fd] text-white transition-all shadow-sm">°C</button>
             <button id="unit-f" type="button" aria-pressed="false" class="mobile-touch-target px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all">°F</button>
           </div>
         </div>
@@ -109,9 +118,9 @@
             placeholder="Cerca città o comune (es. Roma, Milano, Tokyo)..." 
             autocomplete="off"
             spellcheck="false"
-            class="w-full pl-10 pr-10 py-2.5 rounded-xl glass-input text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400/50 focus:border-sky-400 transition-all"
+            class="w-full pl-10 pr-10 py-2.5 rounded-xl glass-input text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2690fd]/50 focus:border-[#2690fd] transition-all"
           />
-          <button id="search-clear" type="button" aria-label="Cancella testo di ricerca" class="hidden absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-400">
+          <button id="search-clear" type="button" aria-label="Cancella testo di ricerca" class="hidden absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2690fd]">
             <i data-lucide="x" class="w-3.5 h-3.5" aria-hidden="true"></i>
           </button>
         </div>
@@ -229,12 +238,12 @@
       </section>
 
       <!-- 2. SINTESI DELLA GIORNATA (Card informativa testuale generata dai dati) -->
-      <section id="section-summary" aria-labelledby="summary-title" class="rounded-2xl p-4 sm:p-5 glass-card border-l-4 border-l-sky-400 flex items-start gap-3.5">
-        <div class="p-2 rounded-xl bg-sky-500/20 text-sky-400 shrink-0 mt-0.5">
+      <section id="section-summary" aria-labelledby="summary-title" class="rounded-2xl p-4 sm:p-5 glass-card border-l-4 border-l-[#f2ff00] flex items-start gap-3.5 shadow-lg">
+        <div class="p-2 rounded-xl bg-[#f2ff00]/15 text-[#f2ff00] shrink-0 mt-0.5">
           <i data-lucide="sparkles" class="w-5 h-5" aria-hidden="true"></i>
         </div>
         <div class="flex-1 text-sm">
-          <h2 id="summary-title" class="text-xs font-bold uppercase tracking-wider text-sky-300">Sintesi meteorologica odierna</h2>
+          <h2 id="summary-title" class="text-xs font-bold uppercase tracking-wider text-[#f2ff00]">Sintesi meteorologica odierna</h2>
           <p id="summary-text" class="text-slate-200 mt-1 leading-relaxed">
             Generazione della sintesi in corso in base ai dati orari...
           </p>
@@ -245,7 +254,7 @@
       <section id="section-hourly" aria-labelledby="hourly-title" class="rounded-3xl p-5 sm:p-6 glass-card space-y-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <i data-lucide="clock" class="w-5 h-5 text-sky-400" aria-hidden="true"></i>
+            <i data-lucide="clock" class="w-5 h-5 text-[#2690fd]" aria-hidden="true"></i>
             <h2 id="hourly-title" class="font-bold text-base sm:text-lg text-white">Previsioni Orarie (Prossime 24 Ore)</h2>
           </div>
           <span class="text-xs text-slate-400 hidden sm:inline">Scorri lateralmente per visualizzare l'arco della giornata</span>
@@ -261,7 +270,7 @@
       <section id="section-daily" aria-labelledby="daily-title" class="rounded-3xl p-5 sm:p-6 glass-card space-y-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <i data-lucide="calendar" class="w-5 h-5 text-sky-400" aria-hidden="true"></i>
+            <i data-lucide="calendar" class="w-5 h-5 text-[#2690fd]" aria-hidden="true"></i>
             <h2 id="daily-title" class="font-bold text-base sm:text-lg text-white">Previsioni per i prossimi 7 giorni</h2>
           </div>
           <span class="text-xs text-slate-400">Escursione termica minima - massima</span>
@@ -277,7 +286,7 @@
         
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <i data-lucide="sliders" class="w-5 h-5 text-sky-400" aria-hidden="true"></i>
+            <i data-lucide="sliders" class="w-5 h-5 text-[#2690fd]" aria-hidden="true"></i>
             <h2 id="details-title" class="font-bold text-base sm:text-lg text-white">Dettagli Atmosferici & Qualità dell'Aria</h2>
           </div>
         </div>
@@ -289,7 +298,7 @@
           <div class="rounded-2xl p-5 glass-card flex flex-col justify-between">
             <div class="flex items-center justify-between">
               <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Precipitazioni</span>
-              <div class="p-2 rounded-xl bg-sky-500/20 text-sky-400">
+              <div class="p-2 rounded-xl bg-[#2690fd]/20 text-[#2690fd]">
                 <i data-lucide="cloud-rain" class="w-5 h-5" aria-hidden="true"></i>
               </div>
             </div>
@@ -303,11 +312,11 @@
               </div>
               <div class="text-xs text-slate-300 mt-2 flex items-center justify-between border-t border-white/5 pt-1.5">
                 <span>Probabilità max oggi:</span>
-                <strong id="metric-precip-prob" class="text-sky-300">0%</strong>
+                <strong id="metric-precip-prob" class="text-[#f2ff00]">0%</strong>
               </div>
             </div>
             <div class="w-full bg-white/10 rounded-full h-1.5 overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="precip-progressbar">
-              <div id="metric-precip-bar" class="bg-sky-400 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+              <div id="metric-precip-bar" class="bg-[#2690fd] h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
             </div>
           </div>
 
@@ -315,7 +324,7 @@
           <div class="rounded-2xl p-5 glass-card flex flex-col justify-between">
             <div class="flex items-center justify-between">
               <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Vento Attuale</span>
-              <div class="p-2 rounded-xl bg-teal-500/20 text-teal-400">
+              <div class="p-2 rounded-xl bg-[#2690fd]/20 text-[#2690fd]">
                 <i data-lucide="wind" class="w-5 h-5" aria-hidden="true"></i>
               </div>
             </div>
@@ -326,13 +335,13 @@
                   <span id="metric-wind-unit" class="text-sm text-slate-400">km/h</span>
                 </div>
                 <div class="text-xs text-slate-300 mt-1">
-                  Raffiche max: <strong id="metric-wind-gusts" class="text-teal-300">-- km/h</strong>
+                  Raffiche max: <strong id="metric-wind-gusts" class="text-slate-200">-- km/h</strong>
                 </div>
               </div>
-              <!-- Bussola grafica dinamica -->
-              <div class="relative w-12 h-12 rounded-full border border-teal-500/30 bg-teal-950/40 flex items-center justify-center shrink-0" title="Direzione di provenienza del vento">
-                <span class="absolute top-0.5 text-[9px] font-bold text-teal-400">N</span>
-                <i id="compass-needle" data-lucide="navigation" class="w-5 h-5 text-teal-400 compass-arrow" aria-hidden="true"></i>
+              <!-- Bussola grafica dinamica con colori brand -->
+              <div class="relative w-12 h-12 rounded-full border border-[#2690fd]/40 bg-[#071126] flex items-center justify-center shrink-0" title="Direzione di provenienza del vento">
+                <span class="absolute top-0.5 text-[9px] font-bold text-[#f2ff00]">N</span>
+                <i id="compass-needle" data-lucide="navigation" class="w-5 h-5 text-[#f2ff00] compass-arrow" aria-hidden="true"></i>
               </div>
             </div>
             <div class="text-xs text-slate-400 flex items-center justify-between pt-1 border-t border-white/5">
@@ -345,7 +354,7 @@
           <div class="rounded-2xl p-5 glass-card flex flex-col justify-between">
             <div class="flex items-center justify-between">
               <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Parametri Meteo</span>
-              <div class="p-2 rounded-xl bg-indigo-500/20 text-indigo-400">
+              <div class="p-2 rounded-xl bg-[#2690fd]/20 text-[#2690fd]">
                 <i data-lucide="gauge" class="w-5 h-5" aria-hidden="true"></i>
               </div>
             </div>
@@ -368,7 +377,7 @@
               </div>
             </div>
             <div class="text-xs text-slate-400 border-t border-white/5 pt-1 truncate">
-              Rischio UV: <span id="metric-uv-desc" class="text-slate-200 font-medium">Basso</span>
+              Rischio UV: <span id="metric-uv-desc" class="text-[#f2ff00] font-medium">Basso</span>
             </div>
           </div>
 
@@ -530,7 +539,7 @@
           <!-- Pulsanti Preset Giorni -->
           <div class="flex flex-wrap items-center gap-1.5 text-xs" role="group" aria-label="Seleziona intervallo storico">
             <button type="button" class="btn-history-preset mobile-touch-target px-3 py-1.5 rounded-xl glass-card interactive-control text-slate-200" data-days="7">7 Giorni</button>
-            <button type="button" class="btn-history-preset mobile-touch-target px-3 py-1.5 rounded-xl bg-purple-600 text-white font-semibold shadow-sm" data-days="14">14 Giorni</button>
+            <button type="button" class="btn-history-preset mobile-touch-target px-3 py-1.5 rounded-xl bg-[#2690fd] text-white font-semibold shadow-sm" data-days="14">14 Giorni</button>
             <button type="button" class="btn-history-preset mobile-touch-target px-3 py-1.5 rounded-xl glass-card interactive-control text-slate-200" data-days="30">30 Giorni</button>
             <button type="button" class="btn-history-preset mobile-touch-target px-3 py-1.5 rounded-xl glass-card interactive-control text-slate-200" data-days="90">90 Giorni</button>
           </div>
@@ -542,16 +551,16 @@
             <span class="text-slate-300 font-medium">Intervallo personalizzato:</span>
             <div class="flex items-center gap-2">
               <label for="history-start-date" class="text-slate-400">Da:</label>
-              <input type="date" id="history-start-date" class="bg-slate-900 border border-white/20 rounded-lg px-2.5 py-1 text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400">
+              <input type="date" id="history-start-date" class="bg-slate-900 border border-white/20 rounded-lg px-2.5 py-1 text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2690fd]">
             </div>
             <div class="flex items-center gap-2">
               <label for="history-end-date" class="text-slate-400">A:</label>
-              <input type="date" id="history-end-date" class="bg-slate-900 border border-white/20 rounded-lg px-2.5 py-1 text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400">
+              <input type="date" id="history-end-date" class="bg-slate-900 border border-white/20 rounded-lg px-2.5 py-1 text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2690fd]">
             </div>
-            <button id="btn-apply-history-custom" type="button" class="mobile-touch-target px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 font-semibold text-white interactive-control">
+            <button id="btn-apply-history-custom" type="button" class="mobile-touch-target px-3 py-1.5 rounded-lg bg-[#2690fd] hover:bg-[#0d74e3] font-semibold text-white interactive-control">
               Applica date
             </button>
-            <span id="history-range-badge" class="ml-auto text-xs font-semibold px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-500/30">
+            <span id="history-range-badge" class="ml-auto text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#f2ff00]/15 text-[#f2ff00] border border-[#f2ff00]/30">
               Periodo: --
             </span>
           </div>
@@ -591,7 +600,7 @@
           <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
             <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Pioggia Totale</span>
             <div class="flex items-baseline gap-1 mt-1">
-              <span id="hist-stat-total-precip" class="text-2xl font-bold text-sky-400">--</span>
+              <span id="hist-stat-total-precip" class="text-2xl font-bold text-[#2690fd]">--</span>
               <span class="text-xs text-slate-400" id="hist-unit-precip">mm</span>
             </div>
             <span class="text-xs text-slate-400">Cumulata complessiva</span>
@@ -623,7 +632,7 @@
           <div class="p-4 sm:p-5 rounded-2xl bg-slate-900/60 border border-white/10 space-y-3">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <i data-lucide="thermometer" class="w-4 h-4 text-rose-400" aria-hidden="true"></i>
+                <i data-lucide="thermometer" class="w-4 h-4 text-[#f2ff00]" aria-hidden="true"></i>
                 <h3 class="text-sm font-bold text-white">Escursione Termica Giornaliera</h3>
               </div>
               <span class="text-xs text-slate-400">Min / Media / Max</span>
@@ -637,7 +646,7 @@
           <div class="p-4 sm:p-5 rounded-2xl bg-slate-900/60 border border-white/10 space-y-3">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <i data-lucide="cloud-rain" class="w-4 h-4 text-sky-400" aria-hidden="true"></i>
+                <i data-lucide="cloud-rain" class="w-4 h-4 text-[#2690fd]" aria-hidden="true"></i>
                 <h3 class="text-sm font-bold text-white">Precipitazioni Cumulate & Vento</h3>
               </div>
               <span class="text-xs text-slate-400">Barre precipitazioni / Linea vento max</span>
@@ -654,14 +663,14 @@
     </div>
   </main>
 
-  <!-- Footer con indicazione trasparente delle fonti dei dati -->
-  <footer class="mt-auto border-t border-white/10 bg-slate-950/90 backdrop-blur-md py-6 px-4 text-xs text-slate-400">
+  <!-- Footer con logo e indicazione trasparente delle fonti dei dati -->
+  <footer class="mt-auto border-t border-white/10 bg-[#071126]/90 backdrop-blur-md py-6 px-4 text-xs text-slate-400">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-2">
-        <i data-lucide="cloud-sun" class="w-4 h-4 text-sky-400" aria-hidden="true"></i>
-        <span class="font-bold text-slate-200">MeteoVision</span>
+      <div class="flex items-center gap-2.5">
+        <img src="/static/assets/logo.png" alt="weaether" class="w-6 h-6 rounded-md object-cover border border-[#2690fd]/40">
+        <span class="font-bold text-white text-sm">wea<span class="text-[#f2ff00]">ether</span></span>
         <span>•</span>
-        <span>Architettura Python FastAPI & Web Responsive</span>
+        <span>Meteo, Aria & Archivio Storico</span>
       </div>
       <div class="text-center md:text-right space-y-1">
         <p>Fonti dati aperte: <strong>Open-Meteo</strong> (modelli meteorologici ECMWF & DWD ICON) e <strong>Copernicus CAMS</strong> (qualità atmosferica).</p>

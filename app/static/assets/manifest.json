@@ -1,0 +1,22 @@
+{
+  "name": "Weaether",
+  "short_name": "Weaether",
+  "description": "Previsioni meteo, qualità dell'aria e archivio storico",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a1128",
+  "theme_color": "#2690fd",
+  "icons": [
+    {
+      "src": "/static/assets/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/assets/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+
