@@ -1,31 +1,50 @@
 /* Custom Styles & Responsiveness Enhancements for MeteoVision */
 
 @layer utilities {
+  /* Scheda informativa statica: pulita, senza sollevamento al passaggio del mouse */
   .glass-card {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(15, 23, 42, 0.55);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.12);
   }
 
-  .glass-card-hover {
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Controlli e pulsanti interattivi con feedback tattile/visivo */
+  .interactive-control {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .glass-card-hover:hover {
-    background: rgba(255, 255, 255, 0.14);
-    border-color: rgba(255, 255, 255, 0.25);
-    transform: translateY(-2px);
+  .interactive-control:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+  }
+
+  .interactive-control:active {
+    transform: translateY(0);
   }
 
   .glass-input {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(15, 23, 42, 0.7);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
 }
 
-/* Custom scrollbar for horizontal hourly forecast */
+/* Accessibilità del focus tastiera */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
+}
+
+/* Offset sicuro per ancore sticky su mobile e desktop */
+[id^="section-"] {
+  scroll-margin-top: 6.5rem;
+}
+
+/* Custom scrollbar */
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
@@ -43,20 +62,20 @@
   border-radius: 9999px;
 }
 .custom-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
   border-radius: 9999px;
 }
 .custom-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.4);
 }
 
-/* Pulsing animated weather indicator */
+/* Animazione galleggiamento icona meteo principale */
 @keyframes float {
   0%, 100% {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-6px);
+    transform: translateY(-5px);
   }
 }
 
@@ -64,21 +83,47 @@
   animation: float 4s ease-in-out infinite;
 }
 
-/* Compass rotation transition */
+/* Transizione bussola vento */
 .compass-arrow {
   transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Weather background transition */
+/* Transizione sfondo meteo */
 #weather-bg {
   transition: background-image 1s ease-in-out, background-color 1s ease-in-out;
 }
 
-/* Mobile responsive padding and touch safety */
+/* Touch target minimo conforme WAI-ARIA su mobile (44x44px) */
 @media (max-width: 640px) {
   .mobile-touch-target {
     min-height: 44px;
     min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
+/* Rispetto delle preferenze utente per riduzione movimento */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .animate-float {
+    animation: none !important;
+  }
+
+  .compass-arrow {
+    transition: none !important;
+  }
+
+  #weather-bg {
+    transition: none !important;
+  }
+}

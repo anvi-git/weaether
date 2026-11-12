@@ -70,14 +70,16 @@ async def history(
         # ma per date recenti sono disponibili fino a 2-3 giorni fa.
         if days_ago:
             end = today - timedelta(days=2)
-            start = end - timedelta(days=days_ago)
+            # Conteggio inclusivo: N giorni significa (end - (N - 1))
+            days_offset = max(0, days_ago - 1)
+            start = end - timedelta(days=days_offset)
             start_str = start.strftime("%Y-%m-%d")
             end_str = end.strftime("%Y-%m-%d")
         else:
             if not start_date or not end_date:
-                # Default: ultimi 14 giorni (fino a 2 giorni fa)
+                # Default: ultimi 14 giorni inclusivi (fino a 2 giorni fa)
                 end = today - timedelta(days=2)
-                start = end - timedelta(days=14)
+                start = end - timedelta(days=13)
                 start_str = start.strftime("%Y-%m-%d")
                 end_str = end.strftime("%Y-%m-%d")
             else:

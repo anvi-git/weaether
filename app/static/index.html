@@ -2,10 +2,10 @@
 <html lang="it" class="h-full">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>MeteoVision - Previsioni Meteo & Dati Storici</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MeteoVision - Previsioni Meteo, Qualità dell'Aria & Dati Storici</title>
   
-  <!-- Google Fonts: Inter -->
+  <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -45,166 +45,181 @@
 </head>
 <body class="min-h-full bg-slate-950 text-slate-100 font-sans selection:bg-sky-500 selection:text-white flex flex-col transition-colors duration-500">
 
-  <!-- Dynamic Background Overlay -->
+  <!-- Sfondo dinamico in base alle condizioni meteo -->
   <div id="weather-bg" class="fixed inset-0 pointer-events-none -z-10 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 opacity-90 transition-all duration-1000"></div>
 
-  <!-- Ambient Glow Effects -->
+  <!-- Effetti ambientali soffusi -->
   <div class="fixed top-0 left-1/4 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
   <div class="fixed bottom-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none -z-10"></div>
 
-  <!-- Header / Navigation -->
-  <header class="sticky top-0 z-40 backdrop-blur-md bg-slate-950/70 border-b border-white/10 px-4 py-3 sm:px-6 lg:px-8">
+  <!-- Barra di avanzamento aggiornamento in background (non invasiva) -->
+  <div id="updating-indicator" class="fixed top-0 left-0 right-0 h-1 bg-sky-400 z-50 transform -translate-y-full transition-transform duration-300">
+    <div class="w-full h-full bg-white/40 animate-pulse"></div>
+  </div>
+
+  <!-- Header principale -->
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-slate-950/80 border-b border-white/10 px-4 py-3 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3">
       
-      <!-- Top Row: Logo & Quick Controls -->
+      <!-- Logo e controlli rapidi -->
       <div class="flex items-center justify-between">
-        <a href="#" class="flex items-center gap-2.5 group">
+        <a href="#" class="flex items-center gap-2.5 group" aria-label="MeteoVision Home">
           <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-400 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-500/25 group-hover:scale-105 transition-transform">
-            <i data-lucide="cloud-sun" class="w-6 h-6 text-white"></i>
+            <i data-lucide="cloud-sun" class="w-6 h-6 text-white" aria-hidden="true"></i>
           </div>
           <div>
             <div class="font-bold text-lg leading-tight tracking-tight flex items-center gap-1.5">
               <span>Meteo<span class="text-sky-400">Vision</span></span>
-              <span class="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-400/30">Live</span>
+              <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-white/10 text-slate-300 border border-white/10" id="header-data-badge">Previsioni orarie</span>
             </div>
-            <p class="text-xs text-slate-400 hidden sm:block">Previsioni e archivio storico</p>
+            <p class="text-xs text-slate-400 hidden sm:block">Previsioni meteorologiche e qualità dell'aria</p>
           </div>
         </a>
 
-        <!-- Controls (Mobile + Desktop) -->
+        <!-- Controlli Unità e GPS -->
         <div class="flex items-center gap-2">
-          <!-- Geolocation Button -->
-          <button id="btn-geolocation" title="Usa la mia posizione attuale" class="mobile-touch-target p-2 sm:px-3 sm:py-2 rounded-xl glass-card glass-card-hover flex items-center gap-1.5 text-xs font-medium text-slate-200">
-            <i data-lucide="map-pin" class="w-4 h-4 text-sky-400"></i>
+          <!-- Pulsante Geolocalizzazione -->
+          <button id="btn-geolocation" type="button" title="Rileva la mia posizione attuale tramite GPS" aria-label="Rileva la mia posizione attuale tramite GPS" class="mobile-touch-target px-3 py-2 rounded-xl glass-card interactive-control flex items-center gap-1.5 text-xs font-medium text-slate-200">
+            <i data-lucide="map-pin" class="w-4 h-4 text-sky-400" aria-hidden="true"></i>
             <span class="hidden sm:inline">Mia Posizione</span>
           </button>
 
-          <!-- Unit Switcher -->
-          <div class="flex items-center rounded-xl glass-card p-0.5 border border-white/10 text-xs font-semibold">
-            <button id="unit-c" class="px-2.5 py-1.5 rounded-lg bg-sky-500 text-white transition-all shadow-sm">°C</button>
-            <button id="unit-f" class="px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all">°F</button>
+          <!-- Selettore Unità (°C / °F) -->
+          <div class="flex items-center rounded-xl glass-card p-0.5 border border-white/10 text-xs font-semibold" role="group" aria-label="Seleziona unità di temperatura">
+            <button id="unit-c" type="button" aria-pressed="true" class="mobile-touch-target px-2.5 py-1.5 rounded-lg bg-sky-500 text-white transition-all shadow-sm">°C</button>
+            <button id="unit-f" type="button" aria-pressed="false" class="mobile-touch-target px-2.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all">°F</button>
           </div>
         </div>
       </div>
 
-      <!-- Search Bar -->
+      <!-- Barra di Ricerca Località (WAI-ARIA Combobox) -->
       <div class="relative flex-1 max-w-xl md:mx-4">
+        <label for="search-input" class="sr-only">Cerca città o luogo</label>
         <div class="relative">
-          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true"></i>
           <input 
             type="text" 
             id="search-input" 
-            placeholder="Cerca città o luogo (es. Roma, Milano, Tokyo)..." 
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded="false"
+            aria-haspopup="listbox"
+            aria-controls="search-dropdown"
+            aria-activedescendant=""
+            placeholder="Cerca città o comune (es. Roma, Milano, Tokyo)..." 
             autocomplete="off"
-            class="w-full pl-10 pr-10 py-2.5 rounded-xl glass-input text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400/50 focus:border-sky-400/60 transition-all"
+            spellcheck="false"
+            class="w-full pl-10 pr-10 py-2.5 rounded-xl glass-input text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400/50 focus:border-sky-400 transition-all"
           />
-          <button id="search-clear" class="hidden absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-white">
-            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          <button id="search-clear" type="button" aria-label="Cancella testo di ricerca" class="hidden absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-400">
+            <i data-lucide="x" class="w-3.5 h-3.5" aria-hidden="true"></i>
           </button>
         </div>
 
-        <!-- Autocomplete Dropdown -->
-        <div id="search-dropdown" class="hidden absolute left-0 right-0 mt-2 bg-slate-900/95 backdrop-blur-xl border border-white/15 rounded-2xl shadow-2xl shadow-black/80 overflow-hidden z-50 divide-y divide-white/5">
-          <!-- Dinamico -->
+        <!-- Dropdown risultati (WAI-ARIA listbox) -->
+        <div id="search-dropdown" role="listbox" aria-label="Suggerimenti città" class="hidden absolute left-0 right-0 mt-2 bg-slate-900/95 backdrop-blur-xl border border-white/15 rounded-2xl shadow-2xl shadow-black/80 overflow-hidden z-50 divide-y divide-white/5 max-h-72 overflow-y-auto custom-scroll">
+          <!-- Popolato dinamicamente -->
         </div>
       </div>
 
-      <!-- Quick Cities Chips (Hidden on small mobile, visible on tablet/pc) -->
-      <div class="hidden lg:flex items-center gap-1.5">
-        <span class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold mr-1">Rapidi:</span>
-        <button class="quick-city-chip px-2.5 py-1 text-xs rounded-lg glass-card hover:bg-white/15 text-slate-300 transition-colors" data-lat="41.89" data-lon="12.51" data-name="Roma">Roma</button>
-        <button class="quick-city-chip px-2.5 py-1 text-xs rounded-lg glass-card hover:bg-white/15 text-slate-300 transition-colors" data-lat="45.46" data-lon="9.19" data-name="Milano">Milano</button>
-        <button class="quick-city-chip px-2.5 py-1 text-xs rounded-lg glass-card hover:bg-white/15 text-slate-300 transition-colors" data-lat="40.85" data-lon="14.27" data-name="Napoli">Napoli</button>
-        <button class="quick-city-chip px-2.5 py-1 text-xs rounded-lg glass-card hover:bg-white/15 text-slate-300 transition-colors" data-lat="45.07" data-lon="7.69" data-name="Torino">Torino</button>
-        <button class="quick-city-chip px-2.5 py-1 text-xs rounded-lg glass-card hover:bg-white/15 text-slate-300 transition-colors" data-lat="51.51" data-lon="-0.13" data-name="Londra">Londra</button>
+      <!-- Città Rapide e Preferiti -->
+      <div id="quick-cities-desktop" class="hidden lg:flex items-center gap-1.5 flex-wrap">
+        <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold mr-1">Recenti:</span>
+        <div id="quick-chips-container" class="flex items-center gap-1.5">
+          <!-- Popolato dinamicamente da app.js con preferiti e recenti -->
+        </div>
       </div>
 
     </div>
 
-    <!-- Mobile Quick City Scroll -->
-    <div class="lg:hidden flex items-center gap-1.5 overflow-x-auto scrollbar-none pt-2 mt-1 border-t border-white/5">
-      <span class="text-[10px] text-slate-400 uppercase font-semibold shrink-0">Popolari:</span>
-      <button class="quick-city-chip shrink-0 px-2.5 py-1 text-xs rounded-lg glass-card text-slate-300" data-lat="41.89" data-lon="12.51" data-name="Roma">Roma</button>
-      <button class="quick-city-chip shrink-0 px-2.5 py-1 text-xs rounded-lg glass-card text-slate-300" data-lat="45.46" data-lon="9.19" data-name="Milano">Milano</button>
-      <button class="quick-city-chip shrink-0 px-2.5 py-1 text-xs rounded-lg glass-card text-slate-300" data-lat="40.85" data-lon="14.27" data-name="Napoli">Napoli</button>
-      <button class="quick-city-chip shrink-0 px-2.5 py-1 text-xs rounded-lg glass-card text-slate-300" data-lat="45.07" data-lon="7.69" data-name="Torino">Torino</button>
-      <button class="quick-city-chip shrink-0 px-2.5 py-1 text-xs rounded-lg glass-card text-slate-300" data-lat="38.12" data-lon="13.36" data-name="Palermo">Palermo</button>
-      <button class="quick-city-chip shrink-0 px-2.5 py-1 text-xs rounded-lg glass-card text-slate-300" data-lat="40.71" data-lon="-74.01" data-name="New York">New York</button>
+    <!-- Barra Preferiti/Recenti su Mobile -->
+    <div id="quick-cities-mobile" class="lg:hidden flex items-center gap-1.5 overflow-x-auto scrollbar-none pt-2 mt-1 border-t border-white/5">
+      <span class="text-xs text-slate-400 uppercase font-semibold shrink-0">Recenti:</span>
+      <div id="quick-chips-mobile-container" class="flex items-center gap-1.5 shrink-0">
+        <!-- Popolato dinamicamente -->
+      </div>
     </div>
   </header>
 
-  <!-- Mobile Sticky Anchor Nav -->
-  <nav class="sm:hidden sticky top-[108px] z-30 bg-slate-950/85 backdrop-blur-md border-b border-white/10 px-4 py-2 flex items-center justify-between text-xs font-medium text-slate-400">
-    <a href="#section-current" class="mobile-nav-link text-sky-400">Attuale</a>
-    <a href="#section-hourly" class="mobile-nav-link hover:text-white">24 Ore</a>
-    <a href="#section-daily" class="mobile-nav-link hover:text-white">7 Giorni</a>
-    <a href="#section-air" class="mobile-nav-link hover:text-white">Aria</a>
-    <a href="#section-history" class="mobile-nav-link hover:text-white">Storico</a>
+  <!-- Barra di Navigazione Mobile Sticky (Sincronizzata con Scrollspy) -->
+  <nav id="mobile-sticky-nav" aria-label="Navigazione sezioni meteo" class="sm:hidden sticky top-[108px] z-30 bg-slate-950/90 backdrop-blur-md border-b border-white/10 px-4 py-2 flex items-center justify-between text-xs font-medium text-slate-400">
+    <a href="#section-current" class="mobile-nav-link py-1 text-sky-400 border-b-2 border-sky-400">Attuale</a>
+    <a href="#section-hourly" class="mobile-nav-link py-1 hover:text-white">24 Ore</a>
+    <a href="#section-daily" class="mobile-nav-link py-1 hover:text-white">7 Giorni</a>
+    <a href="#section-details" class="mobile-nav-link py-1 hover:text-white">Dettagli</a>
+    <a href="#section-air" class="mobile-nav-link py-1 hover:text-white">Aria</a>
+    <a href="#section-history" class="mobile-nav-link py-1 hover:text-white">Storico</a>
   </nav>
 
-  <!-- Main Container -->
+  <!-- Contenitore Principale -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-5 sm:px-6 lg:px-8 space-y-6">
 
-    <!-- Loading Skeleton -->
-    <div id="loading-state" class="hidden animate-pulse space-y-4">
-      <div class="h-48 rounded-3xl bg-white/5 border border-white/10"></div>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="h-28 rounded-2xl bg-white/5 border border-white/10"></div>
-        <div class="h-28 rounded-2xl bg-white/5 border border-white/10"></div>
-        <div class="h-28 rounded-2xl bg-white/5 border border-white/10"></div>
-        <div class="h-28 rounded-2xl bg-white/5 border border-white/10"></div>
-      </div>
+    <!-- Skeleton Iniziale (visibile solo al primissimo caricamento prima che arrivi qualsiasi dato) -->
+    <div id="initial-skeleton" class="hidden animate-pulse space-y-6">
+      <div class="h-56 rounded-3xl bg-slate-800/40 border border-white/10"></div>
+      <div class="h-24 rounded-2xl bg-slate-800/40 border border-white/10"></div>
+      <div class="h-44 rounded-3xl bg-slate-800/40 border border-white/10"></div>
+      <div class="h-64 rounded-3xl bg-slate-800/40 border border-white/10"></div>
     </div>
 
-    <!-- Error Alert -->
-    <div id="error-state" class="hidden rounded-2xl p-4 bg-rose-500/10 border border-rose-500/30 text-rose-300 flex items-start gap-3">
-      <i data-lucide="alert-triangle" class="w-5 h-5 shrink-0 text-rose-400 mt-0.5"></i>
+    <!-- Errore Principale (mostrato solo se il meteo base fallisce completamente) -->
+    <div id="main-error-alert" class="hidden rounded-2xl p-4 bg-rose-500/10 border border-rose-500/30 text-rose-300 flex items-start gap-3">
+      <i data-lucide="alert-triangle" class="w-5 h-5 shrink-0 text-rose-400 mt-0.5" aria-hidden="true"></i>
       <div class="flex-1 text-sm">
-        <h4 class="font-semibold text-rose-200">Errore nel caricamento</h4>
-        <p id="error-message" class="text-rose-300/90 mt-0.5"></p>
-        <button id="btn-retry" class="mt-2 text-xs font-semibold underline hover:text-rose-100">Riprova</button>
+        <h4 class="font-semibold text-rose-200">Impossibile caricare il meteo</h4>
+        <p id="main-error-message" class="text-rose-300/90 mt-0.5">Si è verificato un errore di connessione. I dati non sono al momento raggiungibili.</p>
+        <button id="btn-main-retry" type="button" class="mt-2.5 px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold interactive-control">
+          Riprova caricamento
+        </button>
       </div>
     </div>
 
-    <!-- Weather Content -->
-    <div id="weather-content" class="space-y-6">
+    <!-- Contenuto Meteo -->
+    <div id="weather-content" class="space-y-6 transition-opacity duration-300">
 
-      <!-- SECTION: Hero Card (Meteo Attuale) -->
-      <section id="section-current" class="relative rounded-3xl p-6 sm:p-8 lg:p-10 glass-card overflow-hidden shadow-2xl">
+      <!-- 1. SEZIONE HERO: Condizioni Meteo Attuali -->
+      <section id="section-current" aria-labelledby="current-city-name" class="relative rounded-3xl p-6 sm:p-8 lg:p-10 glass-card overflow-hidden shadow-2xl">
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           
-          <!-- Location & Summary -->
+          <!-- Località, stato e fuso -->
           <div class="space-y-2">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-xs text-sky-300">
-              <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
-              <span id="current-location-label">Roma, Lazio, Italia</span>
-              <span id="current-badge-day" class="ml-1 text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-amber-400/20 text-amber-300">Giorno</span>
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 shrink-0" aria-hidden="true"></i>
+              <span id="current-location-label">Caricamento...</span>
+              <span id="current-badge-day" class="ml-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300">Giorno</span>
+              
+              <!-- Tasto Aggiungi a Preferiti -->
+              <button id="btn-toggle-favorite" type="button" title="Salva come preferito" aria-label="Aggiungi o rimuovi dai preferiti" class="ml-1 text-slate-400 hover:text-amber-400 focus:outline-none">
+                <i id="fav-star-icon" data-lucide="star" class="w-4 h-4" aria-hidden="true"></i>
+              </button>
             </div>
+
             <h1 id="current-city-name" class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">Roma</h1>
-            <p id="current-weather-desc" class="text-base sm:text-xl text-slate-300 font-medium capitalize">Cielo Sereno</p>
-            <div class="flex items-center gap-3 text-xs sm:text-sm text-slate-400 pt-1">
-              <span>Aggiornato: <strong id="current-updated-time" class="text-slate-200">--:--</strong></span>
+            <p id="current-weather-desc" class="text-lg sm:text-2xl text-slate-200 font-medium capitalize">In rilevamento...</p>
+            
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-slate-400 pt-1">
+              <span>Orario rilevazione: <strong id="current-updated-time" class="text-slate-200 font-semibold">--:--</strong></span>
               <span>•</span>
-              <span>Percepita: <strong id="current-apparent-temp" class="text-slate-200">--°</strong></span>
+              <span>Percepita: <strong id="current-apparent-temp" class="text-slate-200 font-semibold">--°</strong></span>
             </div>
           </div>
 
-          <!-- Temperature & Icon -->
+          <!-- Temperatura & Icona Meteo -->
           <div class="flex items-center gap-4 sm:gap-6 self-start md:self-center">
             <div id="current-weather-icon-wrapper" class="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner animate-float">
-              <i id="current-weather-icon" data-lucide="sun" class="w-12 h-12 sm:w-16 sm:h-16 text-amber-400"></i>
+              <i id="current-weather-icon" data-lucide="sun" class="w-12 h-12 sm:w-16 sm:h-16 text-amber-400" aria-hidden="true"></i>
             </div>
             <div>
               <div class="flex items-baseline">
                 <span id="current-temp" class="text-6xl sm:text-8xl font-black tracking-tighter text-white">--</span>
                 <span id="current-temp-unit" class="text-2xl sm:text-4xl font-light text-slate-300 ml-1">°C</span>
               </div>
-              <div class="flex items-center gap-3 text-xs sm:text-sm font-medium mt-1">
-                <span class="text-rose-400 flex items-center gap-0.5">
-                  <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i> <span id="current-temp-max">--°</span>
+              <div class="flex items-center gap-3 text-sm font-medium mt-1">
+                <span class="text-rose-400 flex items-center gap-0.5" title="Massima di oggi">
+                  <i data-lucide="arrow-up" class="w-4 h-4" aria-hidden="true"></i> <span id="current-temp-max">--°</span>
                 </span>
-                <span class="text-sky-400 flex items-center gap-0.5">
-                  <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i> <span id="current-temp-min">--°</span>
+                <span class="text-sky-400 flex items-center gap-0.5" title="Minima di oggi">
+                  <i data-lucide="arrow-down" class="w-4 h-4" aria-hidden="true"></i> <span id="current-temp-min">--°</span>
                 </span>
               </div>
             </div>
@@ -213,335 +228,408 @@
         </div>
       </section>
 
-      <!-- SECTION: Key Metrics Grid (Precipitazioni, Vento, Aria, Indici) -->
-      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
-        <!-- Precipitazioni -->
-        <div class="rounded-2xl p-5 glass-card glass-card-hover flex flex-col justify-between">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Precipitazioni</span>
-            <div class="p-2 rounded-xl bg-sky-500/20 text-sky-400">
-              <i data-lucide="cloud-rain" class="w-5 h-5"></i>
-            </div>
-          </div>
-          <div class="my-3">
-            <div class="flex items-baseline gap-1">
-              <span id="metric-precip-value" class="text-3xl font-bold text-white">0.0</span>
-              <span id="metric-precip-unit" class="text-sm text-slate-400">mm</span>
-            </div>
-            <div class="text-xs text-slate-300 mt-1 flex items-center gap-1.5">
-              <span>Probabilità oggi:</span>
-              <strong id="metric-precip-prob" class="text-sky-300">0%</strong>
-            </div>
-          </div>
-          <div class="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
-            <div id="metric-precip-bar" class="bg-sky-400 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
-          </div>
+      <!-- 2. SINTESI DELLA GIORNATA (Card informativa testuale generata dai dati) -->
+      <section id="section-summary" aria-labelledby="summary-title" class="rounded-2xl p-4 sm:p-5 glass-card border-l-4 border-l-sky-400 flex items-start gap-3.5">
+        <div class="p-2 rounded-xl bg-sky-500/20 text-sky-400 shrink-0 mt-0.5">
+          <i data-lucide="sparkles" class="w-5 h-5" aria-hidden="true"></i>
         </div>
-
-        <!-- Vento & Bussola -->
-        <div class="rounded-2xl p-5 glass-card glass-card-hover flex flex-col justify-between">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Vento</span>
-            <div class="p-2 rounded-xl bg-teal-500/20 text-teal-400">
-              <i data-lucide="wind" class="w-5 h-5"></i>
-            </div>
-          </div>
-          <div class="my-2 flex items-center justify-between">
-            <div>
-              <div class="flex items-baseline gap-1">
-                <span id="metric-wind-speed" class="text-3xl font-bold text-white">--</span>
-                <span id="metric-wind-unit" class="text-sm text-slate-400">km/h</span>
-              </div>
-              <div class="text-xs text-slate-300 mt-1">
-                Raffiche: <strong id="metric-wind-gusts" class="text-teal-300">-- km/h</strong>
-              </div>
-            </div>
-            <!-- Bussola grafica -->
-            <div class="relative w-12 h-12 rounded-full border border-teal-500/30 bg-teal-950/40 flex items-center justify-center shrink-0">
-              <span class="absolute top-0.5 text-[8px] font-bold text-teal-400">N</span>
-              <i id="compass-needle" data-lucide="navigation" class="w-5 h-5 text-teal-400 compass-arrow"></i>
-            </div>
-          </div>
-          <div class="text-xs text-slate-400 flex items-center justify-between pt-1 border-t border-white/5">
-            <span>Direzione:</span>
-            <span id="metric-wind-direction" class="font-semibold text-slate-200">--</span>
-          </div>
+        <div class="flex-1 text-sm">
+          <h2 id="summary-title" class="text-xs font-bold uppercase tracking-wider text-sky-300">Sintesi meteorologica odierna</h2>
+          <p id="summary-text" class="text-slate-200 mt-1 leading-relaxed">
+            Generazione della sintesi in corso in base ai dati orari...
+          </p>
         </div>
-
-        <!-- Qualità dell'Aria (AQI) -->
-        <div id="section-air" class="rounded-2xl p-5 glass-card glass-card-hover flex flex-col justify-between">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Qualità dell'Aria</span>
-            <div class="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
-              <i data-lucide="leaf" class="w-5 h-5"></i>
-            </div>
-          </div>
-          <div class="my-2">
-            <div class="flex items-center gap-2">
-              <span id="metric-aqi-value" class="text-3xl font-bold text-white">--</span>
-              <span id="metric-aqi-badge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Buona</span>
-            </div>
-            <div class="text-xs text-slate-400 mt-1 flex items-center justify-between">
-              <span>Indice Europeo (EAQI)</span>
-              <span id="metric-aqi-us" class="text-[11px] text-slate-500">US: --</span>
-            </div>
-          </div>
-          <!-- Mini breakdown PM2.5 / PM10 -->
-          <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 text-[11px]">
-            <div>
-              <span class="text-slate-400">PM2.5:</span>
-              <strong id="metric-pm25" class="text-slate-200 ml-1">-- µg/m³</strong>
-            </div>
-            <div>
-              <span class="text-slate-400">PM10:</span>
-              <strong id="metric-pm10" class="text-slate-200 ml-1">-- µg/m³</strong>
-            </div>
-          </div>
-        </div>
-
-        <!-- Altri Dati (Umidità, Pressione, UV) -->
-        <div class="rounded-2xl p-5 glass-card glass-card-hover flex flex-col justify-between">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Parametri</span>
-            <div class="p-2 rounded-xl bg-indigo-500/20 text-indigo-400">
-              <i data-lucide="gauge" class="w-5 h-5"></i>
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-3 my-2 text-xs">
-            <div>
-              <div class="text-slate-400">Umidità</div>
-              <div id="metric-humidity" class="text-xl font-bold text-white">--%</div>
-            </div>
-            <div>
-              <div class="text-slate-400">Pressione</div>
-              <div id="metric-pressure" class="text-xl font-bold text-white">-- hPa</div>
-            </div>
-            <div>
-              <div class="text-slate-400">Indice UV</div>
-              <div id="metric-uv" class="text-xl font-bold text-white">--</div>
-            </div>
-            <div>
-              <div class="text-slate-400">Copertura</div>
-              <div id="metric-clouds" class="text-xl font-bold text-white">--%</div>
-            </div>
-          </div>
-          <div class="text-[11px] text-slate-400 truncate">
-            Livello UV: <span id="metric-uv-desc" class="text-slate-300 font-medium">Basso</span>
-          </div>
-        </div>
-
       </section>
 
-      <!-- SECTION: Previsioni Orarie (24 Ore) -->
-      <section id="section-hourly" class="rounded-3xl p-5 sm:p-6 glass-card space-y-4">
+      <!-- 3. PREVISIONI ORARIE (Prossime 24 Ore) -->
+      <section id="section-hourly" aria-labelledby="hourly-title" class="rounded-3xl p-5 sm:p-6 glass-card space-y-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <i data-lucide="clock" class="w-5 h-5 text-sky-400"></i>
-            <h3 class="font-bold text-base sm:text-lg text-white">Previsioni Orarie (Prossime 24 Ore)</h3>
+            <i data-lucide="clock" class="w-5 h-5 text-sky-400" aria-hidden="true"></i>
+            <h2 id="hourly-title" class="font-bold text-base sm:text-lg text-white">Previsioni Orarie (Prossime 24 Ore)</h2>
           </div>
-          <span class="text-xs text-slate-400 hidden sm:inline">Scorri per esplorare l'arco della giornata</span>
+          <span class="text-xs text-slate-400 hidden sm:inline">Scorri lateralmente per visualizzare l'arco della giornata</span>
         </div>
 
-        <!-- Hourly Scroll Container -->
-        <div id="hourly-container" class="flex gap-3 overflow-x-auto pb-2 custom-scroll snap-x">
+        <!-- Carosello orario con snap touch -->
+        <div id="hourly-container" class="flex gap-3 overflow-x-auto pb-2 custom-scroll snap-x" tabindex="0" aria-label="Sequenza previsioni orarie">
           <!-- Popolato dinamicamente da app.js -->
         </div>
       </section>
 
-      <!-- SECTION: Previsioni a 7 Giorni & Dettaglio Qualità Aria -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        <!-- Previsioni 7 Giorni (2 Colonne su Desktop) -->
-        <section id="section-daily" class="lg:col-span-2 rounded-3xl p-5 sm:p-6 glass-card space-y-4">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <i data-lucide="calendar" class="w-5 h-5 text-sky-400"></i>
-              <h3 class="font-bold text-base sm:text-lg text-white">Previsioni per i prossimi 7 giorni</h3>
-            </div>
+      <!-- 4. PREVISIONI A 7 GIORNI -->
+      <section id="section-daily" aria-labelledby="daily-title" class="rounded-3xl p-5 sm:p-6 glass-card space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="calendar" class="w-5 h-5 text-sky-400" aria-hidden="true"></i>
+            <h2 id="daily-title" class="font-bold text-base sm:text-lg text-white">Previsioni per i prossimi 7 giorni</h2>
           </div>
+          <span class="text-xs text-slate-400">Escursione termica minima - massima</span>
+        </div>
 
-          <div id="daily-container" class="divide-y divide-white/5">
-            <!-- Popolato dinamicamente -->
-          </div>
-        </section>
+        <div id="daily-container" class="divide-y divide-white/5" role="list" aria-label="Elenco previsioni 7 giorni">
+          <!-- Popolato dinamicamente -->
+        </div>
+      </section>
 
-        <!-- Dettaglio Qualità dell'Aria & Inquinanti (1 Colonna) -->
-        <section class="rounded-3xl p-5 sm:p-6 glass-card space-y-4 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <div class="flex items-center gap-2">
-                <i data-lucide="activity" class="w-5 h-5 text-emerald-400"></i>
-                <h3 class="font-bold text-base sm:text-lg text-white">Inquinanti dell'Aria</h3>
-              </div>
-              <span id="aqi-card-level" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">Buona</span>
-            </div>
-
-            <p class="text-xs text-slate-400 mb-4">
-              Concentrazione dei principali inquinanti rilevati dalla stazione di monitoraggio atmosferico più vicina:
-            </p>
-
-            <div class="space-y-3.5 text-xs">
-              <!-- PM2.5 -->
-              <div>
-                <div class="flex justify-between text-slate-300 mb-1">
-                  <span>Particolato Fine (PM2.5)</span>
-                  <strong id="pollutant-pm25">-- µg/m³</strong>
-                </div>
-                <div class="w-full bg-white/10 rounded-full h-1.5">
-                  <div id="pollutant-pm25-bar" class="bg-emerald-400 h-1.5 rounded-full" style="width: 20%"></div>
-                </div>
-              </div>
-
-              <!-- PM10 -->
-              <div>
-                <div class="flex justify-between text-slate-300 mb-1">
-                  <span>Particolato Inalabile (PM10)</span>
-                  <strong id="pollutant-pm10">-- µg/m³</strong>
-                </div>
-                <div class="w-full bg-white/10 rounded-full h-1.5">
-                  <div id="pollutant-pm10-bar" class="bg-emerald-400 h-1.5 rounded-full" style="width: 25%"></div>
-                </div>
-              </div>
-
-              <!-- NO2 -->
-              <div>
-                <div class="flex justify-between text-slate-300 mb-1">
-                  <span>Biossido di Azoto (NO₂)</span>
-                  <strong id="pollutant-no2">-- µg/m³</strong>
-                </div>
-                <div class="w-full bg-white/10 rounded-full h-1.5">
-                  <div id="pollutant-no2-bar" class="bg-blue-400 h-1.5 rounded-full" style="width: 15%"></div>
-                </div>
-              </div>
-
-              <!-- O3 -->
-              <div>
-                <div class="flex justify-between text-slate-300 mb-1">
-                  <span>Ozono Troposferico (O₃)</span>
-                  <strong id="pollutant-o3">-- µg/m³</strong>
-                </div>
-                <div class="w-full bg-white/10 rounded-full h-1.5">
-                  <div id="pollutant-o3-bar" class="bg-amber-400 h-1.5 rounded-full" style="width: 30%"></div>
-                </div>
-              </div>
-
-              <!-- SO2 -->
-              <div>
-                <div class="flex justify-between text-slate-300 mb-1">
-                  <span>Biossido di Zolfo (SO₂)</span>
-                  <strong id="pollutant-so2">-- µg/m³</strong>
-                </div>
-                <div class="w-full bg-white/10 rounded-full h-1.5">
-                  <div id="pollutant-so2-bar" class="bg-teal-400 h-1.5 rounded-full" style="width: 10%"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="pt-4 border-t border-white/10 text-[11px] text-slate-400 flex items-center gap-1.5">
-            <i data-lucide="info" class="w-4 h-4 text-sky-400 shrink-0"></i>
-            <span>Dati orari forniti dai modelli atmosferici CAMS Copernicus.</span>
-          </div>
-        </section>
-
-      </div>
-
-      <!-- SECTION: Dati Storici (Historical Weather Data) -->
-      <section id="section-history" class="rounded-3xl p-5 sm:p-8 glass-card space-y-6">
+      <!-- 5. METRICHE DETTAGLIATE & QUALITÀ DELL'ARIA -->
+      <section id="section-details" aria-labelledby="details-title" class="space-y-4">
         
-        <!-- Section Header with Date Range Controls -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="sliders" class="w-5 h-5 text-sky-400" aria-hidden="true"></i>
+            <h2 id="details-title" class="font-bold text-base sm:text-lg text-white">Dettagli Atmosferici & Qualità dell'Aria</h2>
+          </div>
+        </div>
+
+        <!-- Griglia delle 4 Card Parametri -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          <!-- Card Precipitazioni -->
+          <div class="rounded-2xl p-5 glass-card flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Precipitazioni</span>
+              <div class="p-2 rounded-xl bg-sky-500/20 text-sky-400">
+                <i data-lucide="cloud-rain" class="w-5 h-5" aria-hidden="true"></i>
+              </div>
+            </div>
+            <div class="my-3">
+              <div class="flex items-baseline gap-1">
+                <span id="metric-precip-value" class="text-3xl font-bold text-white">0.0</span>
+                <span id="metric-precip-unit" class="text-sm text-slate-400">mm</span>
+              </div>
+              <div class="text-xs text-slate-300 mt-1">
+                Rilevate nell'ultima ora
+              </div>
+              <div class="text-xs text-slate-300 mt-2 flex items-center justify-between border-t border-white/5 pt-1.5">
+                <span>Probabilità max oggi:</span>
+                <strong id="metric-precip-prob" class="text-sky-300">0%</strong>
+              </div>
+            </div>
+            <div class="w-full bg-white/10 rounded-full h-1.5 overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="precip-progressbar">
+              <div id="metric-precip-bar" class="bg-sky-400 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Card Vento & Bussola -->
+          <div class="rounded-2xl p-5 glass-card flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Vento Attuale</span>
+              <div class="p-2 rounded-xl bg-teal-500/20 text-teal-400">
+                <i data-lucide="wind" class="w-5 h-5" aria-hidden="true"></i>
+              </div>
+            </div>
+            <div class="my-2 flex items-center justify-between">
+              <div>
+                <div class="flex items-baseline gap-1">
+                  <span id="metric-wind-speed" class="text-3xl font-bold text-white">--</span>
+                  <span id="metric-wind-unit" class="text-sm text-slate-400">km/h</span>
+                </div>
+                <div class="text-xs text-slate-300 mt-1">
+                  Raffiche max: <strong id="metric-wind-gusts" class="text-teal-300">-- km/h</strong>
+                </div>
+              </div>
+              <!-- Bussola grafica dinamica -->
+              <div class="relative w-12 h-12 rounded-full border border-teal-500/30 bg-teal-950/40 flex items-center justify-center shrink-0" title="Direzione di provenienza del vento">
+                <span class="absolute top-0.5 text-[9px] font-bold text-teal-400">N</span>
+                <i id="compass-needle" data-lucide="navigation" class="w-5 h-5 text-teal-400 compass-arrow" aria-hidden="true"></i>
+              </div>
+            </div>
+            <div class="text-xs text-slate-400 flex items-center justify-between pt-1 border-t border-white/5">
+              <span>Direzione bussola:</span>
+              <span id="metric-wind-direction" class="font-semibold text-slate-200">--</span>
+            </div>
+          </div>
+
+          <!-- Card Parametri Atmosferici -->
+          <div class="rounded-2xl p-5 glass-card flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Parametri Meteo</span>
+              <div class="p-2 rounded-xl bg-indigo-500/20 text-indigo-400">
+                <i data-lucide="gauge" class="w-5 h-5" aria-hidden="true"></i>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 my-2 text-xs">
+              <div>
+                <div class="text-slate-400">Umidità</div>
+                <div id="metric-humidity" class="text-xl font-bold text-white">--%</div>
+              </div>
+              <div>
+                <div class="text-slate-400">Pressione</div>
+                <div id="metric-pressure" class="text-xl font-bold text-white">-- hPa</div>
+              </div>
+              <div>
+                <div class="text-slate-400">UV max oggi</div>
+                <div id="metric-uv" class="text-xl font-bold text-white">--</div>
+              </div>
+              <div>
+                <div class="text-slate-400">Copertura cielo</div>
+                <div id="metric-clouds" class="text-xl font-bold text-white">--%</div>
+              </div>
+            </div>
+            <div class="text-xs text-slate-400 border-t border-white/5 pt-1 truncate">
+              Rischio UV: <span id="metric-uv-desc" class="text-slate-200 font-medium">Basso</span>
+            </div>
+          </div>
+
+          <!-- Card Qualità dell'Aria (EAQI) -->
+          <div id="section-air" class="rounded-2xl p-5 glass-card flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Qualità dell'Aria</span>
+              <div class="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
+                <i data-lucide="leaf" class="w-5 h-5" aria-hidden="true"></i>
+              </div>
+            </div>
+            
+            <!-- Stato di errore / non disponibile aria isolato -->
+            <div id="air-quality-error" class="hidden text-xs text-amber-300/90 py-2">
+              Dati qualità aria non disponibili per questa zona.
+              <button id="btn-air-retry" type="button" class="underline ml-1 font-semibold text-amber-200">Riprova</button>
+            </div>
+
+            <div id="air-quality-data-container">
+              <div class="my-2">
+                <div class="flex items-center gap-2">
+                  <span id="metric-aqi-value" class="text-3xl font-bold text-white">--</span>
+                  <span id="metric-aqi-badge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Buona</span>
+                </div>
+                <div class="text-xs text-slate-400 mt-1 flex items-center justify-between">
+                  <span>Indice Europeo (EAQI)</span>
+                  <span id="metric-aqi-us" class="text-xs text-slate-400">US AQI: --</span>
+                </div>
+              </div>
+              
+              <!-- Mini breakdown PM2.5 / PM10 -->
+              <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 text-xs">
+                <div>
+                  <span class="text-slate-400">PM2.5:</span>
+                  <strong id="metric-pm25" class="text-slate-200 ml-1">-- µg/m³</strong>
+                </div>
+                <div>
+                  <span class="text-slate-400">PM10:</span>
+                  <strong id="metric-pm10" class="text-slate-200 ml-1">-- µg/m³</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-[11px] text-slate-400 pt-1.5 border-t border-white/5">
+              Modelli Copernicus CAMS
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Dettaglio Completo Inquinanti CAMS -->
+        <div class="rounded-3xl p-5 sm:p-6 glass-card space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <i data-lucide="activity" class="w-5 h-5 text-emerald-400" aria-hidden="true"></i>
+              <h3 class="font-bold text-base sm:text-lg text-white">Dettaglio Inquinanti Atmosferici</h3>
+            </div>
+            <span class="text-xs text-slate-400">Scala basata sui livelli ufficiali EAQI (Copernicus / EEA)</span>
+          </div>
+
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Le barre rappresentano la concentrazione stimata rispetto alle soglie dell'Indice Europeo della Qualità dell'Aria (EAQI). Il verde indica livelli ottimali, giallo moderati, rosso concentrazioni elevate.
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-2 text-xs">
+            <!-- PM2.5 -->
+            <div class="p-3.5 rounded-xl bg-white/5 space-y-2">
+              <div class="flex justify-between text-slate-200">
+                <span class="font-medium">PM2.5 (Particolato fine)</span>
+                <strong id="pollutant-pm25">--</strong>
+              </div>
+              <div class="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                <div id="pollutant-pm25-bar" class="bg-emerald-400 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+              <div class="text-[11px] text-slate-400">Soglia eccellente EAQI: ≤10 µg/m³</div>
+            </div>
+
+            <!-- PM10 -->
+            <div class="p-3.5 rounded-xl bg-white/5 space-y-2">
+              <div class="flex justify-between text-slate-200">
+                <span class="font-medium">PM10 (Particolato inalabile)</span>
+                <strong id="pollutant-pm10">--</strong>
+              </div>
+              <div class="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                <div id="pollutant-pm10-bar" class="bg-emerald-400 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+              <div class="text-[11px] text-slate-400">Soglia eccellente EAQI: ≤20 µg/m³</div>
+            </div>
+
+            <!-- NO2 -->
+            <div class="p-3.5 rounded-xl bg-white/5 space-y-2">
+              <div class="flex justify-between text-slate-200">
+                <span class="font-medium">NO₂ (Biossido di azoto)</span>
+                <strong id="pollutant-no2">--</strong>
+              </div>
+              <div class="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                <div id="pollutant-no2-bar" class="bg-blue-400 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+              <div class="text-[11px] text-slate-400">Soglia eccellente EAQI: ≤40 µg/m³</div>
+            </div>
+
+            <!-- O3 -->
+            <div class="p-3.5 rounded-xl bg-white/5 space-y-2">
+              <div class="flex justify-between text-slate-200">
+                <span class="font-medium">O₃ (Ozono troposferico)</span>
+                <strong id="pollutant-o3">--</strong>
+              </div>
+              <div class="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                <div id="pollutant-o3-bar" class="bg-amber-400 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+              <div class="text-[11px] text-slate-400">Soglia eccellente EAQI: ≤50 µg/m³</div>
+            </div>
+
+            <!-- SO2 -->
+            <div class="p-3.5 rounded-xl bg-white/5 space-y-2">
+              <div class="flex justify-between text-slate-200">
+                <span class="font-medium">SO₂ (Biossido di zolfo)</span>
+                <strong id="pollutant-so2">--</strong>
+              </div>
+              <div class="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                <div id="pollutant-so2-bar" class="bg-teal-400 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+              <div class="text-[11px] text-slate-400">Soglia eccellente EAQI: ≤100 µg/m³</div>
+            </div>
+
+            <!-- CO -->
+            <div class="p-3.5 rounded-xl bg-white/5 space-y-2">
+              <div class="flex justify-between text-slate-200">
+                <span class="font-medium">CO (Monossido di carbonio)</span>
+                <strong id="pollutant-co">--</strong>
+              </div>
+              <div class="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                <div id="pollutant-co-bar" class="bg-sky-400 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+              <div class="text-[11px] text-slate-400">Concentrazione media oraria</div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- 6. SEZIONE ARCHIVIO DATI STORICI -->
+      <section id="section-history" aria-labelledby="history-title" class="rounded-3xl p-5 sm:p-8 glass-card space-y-6">
+        
+        <!-- Header con selettori di periodo -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/10">
           <div>
             <div class="flex items-center gap-2">
               <div class="p-2 rounded-xl bg-purple-500/20 text-purple-400">
-                <i data-lucide="history" class="w-5 h-5"></i>
+                <i data-lucide="history" class="w-5 h-5" aria-hidden="true"></i>
               </div>
-              <h2 class="text-xl sm:text-2xl font-bold text-white">Archivio Dati Storici</h2>
+              <h2 id="history-title" class="text-xl sm:text-2xl font-bold text-white">Archivio Dati Storici</h2>
             </div>
             <p class="text-xs sm:text-sm text-slate-400 mt-1">
-              Esplora l'andamento reale di temperatura, precipitazioni e vento nel passato per questa posizione.
+              Esplora i dati meteo archiviati (temperatura, pioggia cumulata e vento) registrati per questa posizione.
             </p>
           </div>
 
-          <!-- History Period Selectors -->
-          <div class="flex flex-wrap items-center gap-1.5 text-xs">
-            <button class="btn-history-preset px-3 py-1.5 rounded-xl glass-card hover:bg-white/15 text-slate-200 transition-colors" data-days="7">7 Giorni</button>
-            <button class="btn-history-preset px-3 py-1.5 rounded-xl bg-purple-600 text-white font-medium transition-colors" data-days="14">14 Giorni</button>
-            <button class="btn-history-preset px-3 py-1.5 rounded-xl glass-card hover:bg-white/15 text-slate-200 transition-colors" data-days="30">30 Giorni</button>
-            <button class="btn-history-preset px-3 py-1.5 rounded-xl glass-card hover:bg-white/15 text-slate-200 transition-colors" data-days="90">3 Mesi</button>
+          <!-- Pulsanti Preset Giorni -->
+          <div class="flex flex-wrap items-center gap-1.5 text-xs" role="group" aria-label="Seleziona intervallo storico">
+            <button type="button" class="btn-history-preset mobile-touch-target px-3 py-1.5 rounded-xl glass-card interactive-control text-slate-200" data-days="7">7 Giorni</button>
+            <button type="button" class="btn-history-preset mobile-touch-target px-3 py-1.5 rounded-xl bg-purple-600 text-white font-semibold shadow-sm" data-days="14">14 Giorni</button>
+            <button type="button" class="btn-history-preset mobile-touch-target px-3 py-1.5 rounded-xl glass-card interactive-control text-slate-200" data-days="30">30 Giorni</button>
+            <button type="button" class="btn-history-preset mobile-touch-target px-3 py-1.5 rounded-xl glass-card interactive-control text-slate-200" data-days="90">90 Giorni</button>
           </div>
         </div>
 
-        <!-- Custom Date Range Picker (Accordion / Toggle) -->
-        <div class="flex flex-wrap items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10 text-xs">
-          <span class="text-slate-400 font-medium">Oppure scegli periodo:</span>
-          <div class="flex items-center gap-2">
-            <label class="text-slate-400">Da:</label>
-            <input type="date" id="history-start-date" class="bg-slate-900 border border-white/20 rounded-lg px-2.5 py-1 text-slate-200 focus:outline-none focus:ring-1 focus:ring-purple-400">
+        <!-- Selettore intervallo personalizzato con validazione inline -->
+        <div class="space-y-2">
+          <div class="flex flex-wrap items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10 text-xs">
+            <span class="text-slate-300 font-medium">Intervallo personalizzato:</span>
+            <div class="flex items-center gap-2">
+              <label for="history-start-date" class="text-slate-400">Da:</label>
+              <input type="date" id="history-start-date" class="bg-slate-900 border border-white/20 rounded-lg px-2.5 py-1 text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400">
+            </div>
+            <div class="flex items-center gap-2">
+              <label for="history-end-date" class="text-slate-400">A:</label>
+              <input type="date" id="history-end-date" class="bg-slate-900 border border-white/20 rounded-lg px-2.5 py-1 text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400">
+            </div>
+            <button id="btn-apply-history-custom" type="button" class="mobile-touch-target px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 font-semibold text-white interactive-control">
+              Applica date
+            </button>
+            <span id="history-range-badge" class="ml-auto text-xs font-semibold px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              Periodo: --
+            </span>
           </div>
-          <div class="flex items-center gap-2">
-            <label class="text-slate-400">A:</label>
-            <input type="date" id="history-end-date" class="bg-slate-900 border border-white/20 rounded-lg px-2.5 py-1 text-slate-200 focus:outline-none focus:ring-1 focus:ring-purple-400">
+
+          <!-- Alert validazione inline (sostituisce alert browser) -->
+          <div id="history-inline-alert" class="hidden rounded-xl p-3 bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between">
+            <span id="history-inline-msg">Data non valida.</span>
+            <button id="btn-close-history-alert" type="button" class="p-1 hover:text-white" aria-label="Chiudi avviso">
+              <i data-lucide="x" class="w-3.5 h-3.5" aria-hidden="true"></i>
+            </button>
           </div>
-          <button id="btn-apply-history-custom" class="px-3 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 font-semibold text-white transition-colors">
-            Applica
-          </button>
         </div>
 
-        <!-- Historical Summary Statistics Cards -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <!-- Errore e Retry dedicato sezione Storico -->
+        <div id="history-error-card" class="hidden rounded-2xl p-4 bg-rose-500/10 border border-rose-500/30 text-rose-300 flex items-start gap-3">
+          <i data-lucide="alert-triangle" class="w-5 h-5 shrink-0 text-rose-400 mt-0.5" aria-hidden="true"></i>
+          <div class="flex-1 text-xs">
+            <strong class="font-semibold text-rose-200">Impossibile recuperare l'archivio storico</strong>
+            <p id="history-error-msg" class="text-rose-300/90 mt-0.5">I dati storici di Open-Meteo per questo intervallo non sono al momento disponibili.</p>
+            <button id="btn-history-retry" type="button" class="mt-2 px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-semibold interactive-control">
+              Riprova storico
+            </button>
+          </div>
+        </div>
+
+        <!-- Statistiche Riassuntive del Periodo Storico -->
+        <div id="history-stats-container" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
-            <span class="text-[11px] font-medium text-slate-400 uppercase">Temperatura Media</span>
+            <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Temp. Media</span>
             <div class="flex items-baseline gap-1 mt-1">
               <span id="hist-stat-avg-temp" class="text-2xl font-bold text-white">--</span>
               <span class="text-xs text-slate-400" id="hist-unit-temp">°C</span>
             </div>
-            <span class="text-[10px] text-slate-500">Nel periodo scelto</span>
+            <span class="text-xs text-slate-400">Nel periodo scelto</span>
           </div>
 
           <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
-            <span class="text-[11px] font-medium text-slate-400 uppercase">Pioggia Totale</span>
+            <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Pioggia Totale</span>
             <div class="flex items-baseline gap-1 mt-1">
               <span id="hist-stat-total-precip" class="text-2xl font-bold text-sky-400">--</span>
-              <span class="text-xs text-slate-400">mm</span>
+              <span class="text-xs text-slate-400" id="hist-unit-precip">mm</span>
             </div>
-            <span class="text-[10px] text-slate-500">Cumulata complessiva</span>
+            <span class="text-xs text-slate-400">Cumulata complessiva</span>
           </div>
 
           <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
-            <span class="text-[11px] font-medium text-slate-400 uppercase">Temp. Più Alta</span>
+            <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Temp. Più Alta</span>
             <div class="flex items-baseline gap-1 mt-1">
               <span id="hist-stat-max-temp" class="text-2xl font-bold text-rose-400">--</span>
               <span class="text-xs text-slate-400" id="hist-unit-max">°C</span>
             </div>
-            <span id="hist-stat-max-date" class="text-[10px] text-slate-400 truncate">--</span>
+            <span id="hist-stat-max-date" class="text-xs text-slate-400 truncate block">--</span>
           </div>
 
           <div class="p-4 rounded-2xl bg-white/5 border border-white/10">
-            <span class="text-[11px] font-medium text-slate-400 uppercase">Vento di Picco</span>
+            <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Vento di Picco</span>
             <div class="flex items-baseline gap-1 mt-1">
               <span id="hist-stat-max-wind" class="text-2xl font-bold text-teal-400">--</span>
               <span class="text-xs text-slate-400" id="hist-unit-wind">km/h</span>
             </div>
-            <span id="hist-stat-wind-date" class="text-[10px] text-slate-400 truncate">--</span>
+            <span id="hist-stat-wind-date" class="text-xs text-slate-400 truncate block">--</span>
           </div>
         </div>
 
-        <!-- Historical Charts (Responsive Grid: 1 col on mobile, 2 cols on PC) -->
+        <!-- Grafici Storici Chart.js -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
           
-          <!-- Grafico 1: Andamento Temperature -->
+          <!-- Grafico 1: Escursione Termica -->
           <div class="p-4 sm:p-5 rounded-2xl bg-slate-900/60 border border-white/10 space-y-3">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <i data-lucide="thermometer" class="w-4 h-4 text-rose-400"></i>
-                <h4 class="text-sm font-bold text-white">Escursione Termica Giornaliera</h4>
+                <i data-lucide="thermometer" class="w-4 h-4 text-rose-400" aria-hidden="true"></i>
+                <h3 class="text-sm font-bold text-white">Escursione Termica Giornaliera</h3>
               </div>
-              <span class="text-[11px] text-slate-400">Min / Media / Max</span>
+              <span class="text-xs text-slate-400">Min / Media / Max</span>
             </div>
             <div class="h-64 sm:h-72 w-full relative">
-              <canvas id="chart-temp-history"></canvas>
+              <canvas id="chart-temp-history" aria-label="Grafico storico temperature minime, medie e massime" role="img"></canvas>
             </div>
           </div>
 
@@ -549,13 +637,13 @@
           <div class="p-4 sm:p-5 rounded-2xl bg-slate-900/60 border border-white/10 space-y-3">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <i data-lucide="cloud-rain" class="w-4 h-4 text-sky-400"></i>
-                <h4 class="text-sm font-bold text-white">Precipitazioni & Vento</h4>
+                <i data-lucide="cloud-rain" class="w-4 h-4 text-sky-400" aria-hidden="true"></i>
+                <h3 class="text-sm font-bold text-white">Precipitazioni Cumulate & Vento</h3>
               </div>
-              <span class="text-[11px] text-slate-400">Barre mm / Linea km/h</span>
+              <span class="text-xs text-slate-400">Barre precipitazioni / Linea vento max</span>
             </div>
             <div class="h-64 sm:h-72 w-full relative">
-              <canvas id="chart-precip-wind-history"></canvas>
+              <canvas id="chart-precip-wind-history" aria-label="Grafico storico precipitazioni giornaliere e picchi di vento" role="img"></canvas>
             </div>
           </div>
 
@@ -566,17 +654,18 @@
     </div>
   </main>
 
-  <!-- Footer -->
-  <footer class="mt-auto border-t border-white/10 bg-slate-950/80 backdrop-blur-md py-6 px-4 text-center text-xs text-slate-500">
-    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+  <!-- Footer con indicazione trasparente delle fonti dei dati -->
+  <footer class="mt-auto border-t border-white/10 bg-slate-950/90 backdrop-blur-md py-6 px-4 text-xs text-slate-400">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-2">
-        <i data-lucide="cloud-sun" class="w-4 h-4 text-sky-400"></i>
-        <span class="font-semibold text-slate-400">MeteoVision</span>
+        <i data-lucide="cloud-sun" class="w-4 h-4 text-sky-400" aria-hidden="true"></i>
+        <span class="font-bold text-slate-200">MeteoVision</span>
         <span>•</span>
-        <span>Sviluppato con Python & FastAPI</span>
+        <span>Architettura Python FastAPI & Web Responsive</span>
       </div>
-      <div>
-        Dati meteorologici e qualità aria aperti forniti da <a href="https://open-meteo.com" target="_blank" rel="noopener" class="text-sky-400 hover:underline">Open-Meteo</a>
+      <div class="text-center md:text-right space-y-1">
+        <p>Fonti dati aperte: <strong>Open-Meteo</strong> (modelli meteorologici ECMWF & DWD ICON) e <strong>Copernicus CAMS</strong> (qualità atmosferica).</p>
+        <p class="text-[11px] text-slate-500">I dati storici provengono dall'archivio rianalitico ERA5 Open-Meteo con ritardo di consolidamento di 2 giorni.</p>
       </div>
     </div>
   </footer>
@@ -587,4 +676,3 @@
   <script src="/static/js/app.js"></script>
 </body>
 </html>
-

@@ -34,12 +34,15 @@ const Charts = {
 
     if (tempChartInstance) {
       tempChartInstance.destroy();
+      tempChartInstance = null;
     }
+
+    if (!dailyRecords || dailyRecords.length === 0) return;
 
     const ctx = canvas.getContext('2d');
     const labels = dailyRecords.map(r => this.formatDateLabel(r.date));
     
-    // Funzione conversione unità
+    // Funzione conversione unità con protezione da null
     const convert = (c) => {
       if (c === null || c === undefined) return null;
       return isFahrenheit ? Math.round((c * 9/5 + 32) * 10) / 10 : Math.round(c * 10) / 10;
@@ -52,13 +55,13 @@ const Charts = {
     const unitSymbol = isFahrenheit ? '°F' : '°C';
 
     // Gradient per l'area massima
-    const gradientMax = ctx.createLinearGradient(0, 0, 0, 300);
-    gradientMax.addColorStop(0, 'rgba(239, 68, 68, 0.4)');
+    const gradientMax = ctx.createLinearGradient(0, 0, 0, 280);
+    gradientMax.addColorStop(0, 'rgba(239, 68, 68, 0.35)');
     gradientMax.addColorStop(1, 'rgba(239, 68, 68, 0.02)');
 
     // Gradient per l'area minima
-    const gradientMin = ctx.createLinearGradient(0, 0, 0, 300);
-    gradientMin.addColorStop(0, 'rgba(59, 130, 246, 0.3)');
+    const gradientMin = ctx.createLinearGradient(0, 0, 0, 280);
+    gradientMin.addColorStop(0, 'rgba(59, 130, 246, 0.25)');
     gradientMin.addColorStop(1, 'rgba(59, 130, 246, 0.01)');
 
     tempChartInstance = new Chart(ctx, {
@@ -122,14 +125,17 @@ const Charts = {
             }
           },
           tooltip: {
-            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
             titleColor: '#f8fafc',
             bodyColor: '#cbd5e1',
-            borderColor: 'rgba(255, 255, 255, 0.1)',
+            borderColor: 'rgba(255, 255, 255, 0.15)',
             borderWidth: 1,
             padding: 10,
             callbacks: {
-              label: (context) => ` ${context.dataset.label}: ${context.parsed.y} ${unitSymbol}`
+              label: (context) => {
+                const val = context.parsed.y;
+                return val !== null ? ` ${context.dataset.label}: ${val} ${unitSymbol}` : ` ${context.dataset.label}: N/D`;
+              }
             }
           }
         },
@@ -167,7 +173,10 @@ const Charts = {
 
     if (precipWindChartInstance) {
       precipWindChartInstance.destroy();
+      precipWindChartInstance = null;
     }
+
+    if (!dailyRecords || dailyRecords.length === 0) return;
 
     const ctx = canvas.getContext('2d');
     const labels = dailyRecords.map(r => this.formatDateLabel(r.date));
@@ -176,12 +185,14 @@ const Charts = {
     const windUnit = isImperial ? 'mph' : 'km/h';
 
     const precips = dailyRecords.map(r => {
-      const p = r.precipitation || 0;
+      const p = r.precipitation;
+      if (p === null || p === undefined) return 0;
       return isImperial ? +(p * 0.0393701).toFixed(2) : +(p.toFixed(1));
     });
 
     const winds = dailyRecords.map(r => {
-      const w = r.wind_speed_max || 0;
+      const w = r.wind_speed_max;
+      if (w === null || w === undefined) return null;
       return isImperial ? +(w * 0.621371).toFixed(1) : +(w.toFixed(1));
     });
 
@@ -232,12 +243,20 @@ const Charts = {
             }
           },
           tooltip: {
-            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
             titleColor: '#f8fafc',
             bodyColor: '#cbd5e1',
-            borderColor: 'rgba(255, 255, 255, 0.1)',
+            borderColor: 'rgba(255, 255, 255, 0.15)',
             borderWidth: 1,
-            padding: 10
+            padding: 10,
+            callbacks: {
+              label: (context) => {
+                const val = context.parsed.y;
+                const isBar = context.dataset.type === 'bar';
+                const unit = isBar ? precipUnit : windUnit;
+                return ` ${context.dataset.label}: ${val !== null ? val : 'N/D'} ${unit}`;
+              }
+            }
           }
         },
         scales: {
@@ -284,4 +303,3 @@ const Charts = {
     });
   }
 };
-
