@@ -210,6 +210,25 @@ function setupEventListeners() {
   if (histRetryBtn) {
     histRetryBtn.addEventListener('click', () => loadHistoricalData());
   }
+
+  document.querySelectorAll('.comfort-choice').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.comfort-choice').forEach(b => b.classList.remove('is-selected'));
+    btn.classList.add('is-selected');
+    const comfort = btn.dataset.comfort;
+    Storage.set('meteovision_comfort', comfort);
+    document.getElementById('comfort-copy').textContent = `Preferenza salvata: ${comfort}. Potrai correggerla in qualsiasi momento.`;
+  }));
+  document.querySelectorAll('.why-choice').forEach(btn => btn.addEventListener('click', () => renderWhyStory(btn.dataset.why)));
+  document.getElementById('compare-location-btn')?.addEventListener('click', compareLocation);
+  document.getElementById('copy-postcard-btn')?.addEventListener('click', () => sharePostcard(false));
+  document.getElementById('share-postcard-btn')?.addEventListener('click', () => sharePostcard(true));
+  document.getElementById('save-diary-btn')?.addEventListener('click', saveDiaryNote);
+  document.getElementById('reduced-scene-motion')?.addEventListener('change', (event) => {
+    document.getElementById('city-scene')?.classList.toggle('reduced-motion', event.target.checked);
+  });
+  renderDiary();
+  const savedComfort = Storage.get('meteovision_comfort');
+  if (savedComfort) document.querySelector(`.comfort-choice[data-comfort="${savedComfort}"]`)?.classList.add('is-selected');
 }
 
 // Cambio unità di misura
@@ -642,6 +661,8 @@ async function loadWeatherForecast(reqId = State.activeRequestId) {
 
     renderHeroCard();
     renderDailySummary();
+    renderStoryTools();
+    renderEventTimeline();
     renderKeyMetrics();
     renderHourlyForecast();
     renderDailyForecast();
@@ -726,6 +747,7 @@ async function loadHistoricalData(customStart = null, customEnd = null, reqId = 
     State.loading.history = false;
     updateHistoryRangeBadge();
     renderHistoricalSection();
+    renderStoryTools();
     lucide.createIcons();
   } catch (err) {
     if (reqId !== State.activeRequestId) return;
@@ -820,6 +842,8 @@ function updateAllViews() {
   if (State.weather) {
     renderHeroCard();
     renderDailySummary();
+    renderStoryTools();
+    renderEventTimeline();
     renderKeyMetrics();
     renderHourlyForecast();
     renderDailyForecast();
@@ -831,6 +855,116 @@ function updateAllViews() {
     renderHistoricalSection();
   }
   lucide.createIcons();
+}
+
+function renderStoryTools() {
+    const current = State.weather?.current;
+    const today = State.weather?.daily?.[0];
+    if (!current || !today) return;
+
+    const wind = Number(today.wind_speed_max);
+    const temp = Number(today.temp_max);
+    const hourly = State.weather.hourly || [];
+    const rainHour = hourly.find(h => Number(h.precipitation_probability) >= 50);
+    const scene = document.getElementById('city-scene');
+    const sceneCopy = document.getElementById('city-scene-copy');
+    if (scene && sceneCopy) {
+      const isNight = current.is_day === false;
+      scene.style.background = isNight
+        ? 'linear-gradient(180deg,#111827 0%,#312e81 65%,#14532d 65%,#052e16 100%)'
+        : (wind >= 30 ? 'linear-gradient(180deg,#334155 0%,#64748b 65%,#166534 65%,#14532d 100%)' : '');
+      scene.querySelector('.scene-sun').style.opacity = isNight ? '.15' : '1';
+      sceneCopy.textContent = `${State.location.name}: ${current.weather_info?.description || 'condizioni variabili'}${wind >= 30 ? ', alberi in movimento' : ', luce e profilo urbano in evidenza'}.`;
+    }
+
+    const usualCopy = document.getElementById('usual-weather-copy');
+    if (usualCopy && State.history?.average_temperature !== null && State.history?.average_temperature !== undefined) {
+      const avg = Number(State.history.average_temperature);
+      const delta = Number(today.temp_max) - avg;
+      const direction = delta > 1 ? 'più mite' : delta < -1 ? 'più fresca' : 'in linea';
+      usualCopy.textContent = `Oggi la massima prevista (${formatTemp(temp)}°${State.unit}) è ${direction} del riferimento storico scelto (${formatTemp(avg)}°${State.unit}).`;
+      document.getElementById('usual-today-marker').style.left = `${Math.max(3, Math.min(97, 50 + delta * 5))}%`;
+    }
+
+    const confidence = document.getElementById('confidence-copy');
+    if (confidence) {
+      confidence.textContent = rainHour
+        ? `La pioggia è una tendenza da monitorare: il primo intervallo con probabilità significativa è ${rainHour.time?.split('T')[1]?.slice(0, 5) || 'più avanti'}.`
+        : 'La tendenza della giornata non mostra, nei dati disponibili, un singolo evento di pioggia dominante.';
+    }
+    const tempBar = document.getElementById('yesterday-temp-bar');
+    const windBar = document.getElementById('yesterday-wind-bar');
+    if (tempBar) tempBar.style.width = `${Math.min(100, Math.max(8, (temp + 10) * 2.5))}%`;
+    if (windBar) windBar.style.width = `${Math.min(100, Math.max(8, wind * 2))}%`;
+    document.getElementById('yesterday-copy').textContent = 'Il dato osservato di ieri non è ancora disponibile in questa fonte: il confronto non viene stimato.';
+}
+
+function renderWhyStory(type) {
+    const copy = document.getElementById('why-weather-copy');
+    if (!copy) return;
+    const stories = {
+      perceived: 'La temperatura percepita combina temperatura, vento e umidità: per questo può discostarsi dal valore misurato.',
+      rain: 'La probabilità indica quanto è probabile una precipitazione nell’intervallo previsto, non quanti millimetri cadranno.',
+      peak: 'Il massimo può arrivare dopo mezzogiorno perché il suolo continua a cedere calore anche dopo il picco di irraggiamento.'
+    };
+    copy.textContent = stories[type] || stories.perceived;
+}
+
+async function compareLocation() {
+    const input = document.getElementById('compare-location-input');
+    const result = document.getElementById('compare-result');
+    const query = input?.value.trim();
+    if (!query || !result) return;
+    result.textContent = 'Cerco la località e confronto i dati...';
+    try {
+      const matches = await Api.searchCities(query);
+      if (!matches.length) throw new Error('Località non trovata');
+      const other = await Api.getForecast(matches[0].latitude, matches[0].longitude, matches[0].timezone || 'auto');
+      const a = State.weather?.current || {};
+      const b = other?.current || {};
+      const tempDelta = Number(b.temperature) - Number(a.temperature);
+      const windDelta = Number(b.wind_speed) - Number(a.wind_speed);
+      const tempText = Math.abs(tempDelta) < 1 ? 'temperature simili' : `${matches[0].name} è ${tempDelta < 0 ? 'più fresca' : 'più calda'}`;
+      const windText = Math.abs(windDelta) < 2 ? 'vento simile' : `${windDelta < 0 ? 'meno' : 'più'} vento`;
+      result.textContent = `${tempText}, ${windText}. Pioggia: ${b.precipitation ?? '--'} mm contro ${a.precipitation ?? '--'} mm.`;
+    } catch (error) {
+      result.textContent = `Confronto non disponibile: ${error.message}`;
+    }
+}
+
+function postcardText() {
+    const today = State.weather?.daily?.[0];
+    const current = State.weather?.current;
+    return `${State.location.name} · ${new Date().toLocaleDateString('it-IT')}\n${document.getElementById('summary-headline')?.textContent || 'Il meteo di oggi'}\n${formatTemp(current?.temperature)}°${State.unit} · max ${formatTemp(today?.temp_max)}° · pioggia ${today?.precipitation_probability_max ?? '--'}%\nFonte: Open-Meteo · aggiornato ${current?.time?.replace('T', ' ') || 'ora locale'}`;
+}
+
+async function sharePostcard(share) {
+    const text = postcardText();
+    const status = document.getElementById('postcard-status');
+    try {
+      if (share && navigator.share) await navigator.share({ title: `Meteo ${State.location.name}`, text });
+      else await navigator.clipboard.writeText(text);
+      status.textContent = share && navigator.share ? 'Cartolina condivisa.' : 'Cartolina copiata negli appunti.';
+    } catch (error) {
+      status.textContent = `Impossibile condividere: ${error.message}`;
+    }
+}
+
+function saveDiaryNote() {
+    const input = document.getElementById('diary-note');
+    if (!input?.value.trim()) return;
+    const notes = Storage.get('meteovision_diary', []);
+    notes.unshift({ date: new Date().toLocaleDateString('it-IT'), location: State.location.name, text: input.value.trim() });
+    Storage.set('meteovision_diary', notes.slice(0, 10));
+    input.value = '';
+    renderDiary();
+}
+
+function renderDiary() {
+    const list = document.getElementById('diary-list');
+    if (!list) return;
+    const notes = Storage.get('meteovision_diary', []);
+    list.innerHTML = notes.length ? notes.map(n => `<div class="p-2 rounded-lg bg-white/5"><strong class="text-slate-300">${n.date} · ${n.location}</strong><br>${n.text}</div>`).join('') : '<span>Nessuna nota salvata.</span>';
 }
 
 // 1. Render Hero Card
@@ -881,6 +1015,7 @@ function renderHeroCard() {
 function renderDailySummary() {
   const container = document.getElementById('section-summary');
   const textEl = document.getElementById('summary-text');
+  const headlineEl = document.getElementById('summary-headline');
   if (!container || !textEl) return;
 
   const w = State.weather;
@@ -924,7 +1059,30 @@ function renderDailySummary() {
   }
 
   textEl.textContent = sentences.join(' ');
+  if (headlineEl) {
+    headlineEl.textContent = pProb > 40
+      ? 'Mattina da finestra aperta, ma tieni l’ombrello a portata.'
+      : (wMax >= 30 ? 'Il sole c’è, ma oggi il protagonista è il vento.' : 'Una giornata da vivere seguendo il ritmo del cielo.');
+  }
   container.classList.remove('hidden');
+}
+
+function renderEventTimeline() {
+  const container = document.getElementById('timeline-container');
+  const today = State.weather?.daily?.[0];
+  if (!container || !today) return;
+  const events = [];
+  if (today.sunrise) events.push(['Alba', today.sunrise.split('T')[1]?.slice(0, 5) || '--:--', 'sunrise']);
+  if (today.temp_max !== null) events.push(['Picco di temperatura', `${formatTemp(today.temp_max)}°`, 'thermometer']);
+  if (today.precipitation_probability_max > 40) events.push(['Cresce la probabilità di pioggia', `${today.precipitation_probability_max}%`, 'cloud-rain']);
+  if (today.wind_speed_max >= 30) events.push(['Il vento aumenta', `${Math.round(today.wind_speed_max)} km/h`, 'wind']);
+  if (today.sunset) events.push(['Tramonto', today.sunset.split('T')[1]?.slice(0, 5) || '--:--', 'sunset']);
+  container.innerHTML = (events.length ? events : [['Giornata stabile', 'Nessun passaggio dominante', 'circle']]).map(([label, value, icon]) => `
+    <div class="relative pl-5 py-2 border-l border-sky-400/30">
+      <span class="absolute -left-[5px] top-3 w-2 h-2 rounded-full bg-sky-400"></span>
+      <div class="flex items-center justify-between gap-3"><span class="text-sm text-slate-200">${label}</span><span class="text-xs text-sky-300">${value}</span></div>
+    </div>`).join('');
+  lucide.createIcons();
 }
 
 // 3. Render Metriche Chiave

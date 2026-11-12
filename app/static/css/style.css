@@ -93,6 +93,59 @@ input:focus-visible {
   transition: background-image 1s ease-in-out, background-color 1s ease-in-out;
 }
 
+.story-pill {
+  border: 1px solid rgba(125, 211, 252, 0.25);
+  color: #7dd3fc;
+  background: rgba(14, 165, 233, 0.1);
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.story-choice {
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color: #cbd5e1;
+  border-radius: .75rem;
+  padding: .5rem .7rem;
+  font-size: .75rem;
+  transition: all .2s ease;
+}
+.story-choice:hover, .story-choice.is-selected {
+  border-color: rgba(242,255,0,.55);
+  background: rgba(242,255,0,.14);
+  color: white;
+}
+
+.story-compare-bars, .usual-range {
+  height: .45rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  overflow: hidden;
+  position: relative;
+}
+.story-compare-bars span { display: block; height: 50%; width: 0; border-radius: inherit; }
+#yesterday-temp-bar { background: #fbbf24; }
+#yesterday-wind-bar { background: #38bdf8; }
+.usual-range span { display: block; height: 100%; width: 45%; background: linear-gradient(90deg,#38bdf8,#fbbf24,#fb7185); border-radius: inherit; }
+.usual-range i { position: absolute; top: -.2rem; width: .15rem; height: .85rem; background: white; left: 50%; }
+
+.city-scene {
+  height: 105px;
+  border-radius: 1rem;
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(180deg,#1e3a8a 0%,#38bdf8 65%,#0f766e 65%,#14532d 100%);
+}
+.scene-sun { position:absolute; width:34px; height:34px; border-radius:50%; background:#fde047; top:18px; right:22%; box-shadow:0 0 25px #fde047; }
+.scene-mountain { position:absolute; bottom:25px; left:8%; width:75%; height:58px; background:#1e293b; clip-path:polygon(0 100%,28% 20%,45% 60%,64% 0,100% 100%); }
+.scene-city { position:absolute; bottom:0; left:0; right:0; height:30px; background:repeating-linear-gradient(90deg,#0f172a 0 18px,#1e293b 18px 34px,#0f172a 34px 50px); opacity:.9; }
+#reduced-scene-motion:checked + * { animation: none; }
+@media (prefers-reduced-motion: reduce) { .city-scene * { animation: none; } }
+
 /* Touch target minimo conforme WAI-ARIA su mobile (44x44px) */
 @media (max-width: 640px) {
   .mobile-touch-target {
