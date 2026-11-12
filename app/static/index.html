@@ -237,16 +237,69 @@
         </div>
       </section>
 
-      <!-- 2. SINTESI DELLA GIORNATA (Card informativa testuale generata dai dati) -->
-      <section id="section-summary" aria-labelledby="summary-title" class="rounded-2xl p-4 sm:p-5 glass-card border-l-4 border-l-[#f2ff00] flex items-start gap-3.5 shadow-lg">
-        <div class="p-2 rounded-xl bg-[#f2ff00]/15 text-[#f2ff00] shrink-0 mt-0.5">
-          <i data-lucide="sparkles" class="w-5 h-5" aria-hidden="true"></i>
+      <!-- 2. LA GIORNATA IN UNA FRASE (titolo editoriale + spiegazione) -->
+      <section id="section-summary" aria-labelledby="summary-title" class="rounded-2xl glass-card border-l-4 border-l-[#f2ff00] shadow-lg overflow-hidden">
+        <div class="p-4 sm:p-5 flex items-start gap-3.5">
+          <div class="p-2 rounded-xl bg-[#f2ff00]/15 text-[#f2ff00] shrink-0 mt-0.5">
+            <i data-lucide="pencil-line" class="w-5 h-5" aria-hidden="true"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h2 id="summary-title" class="text-xs font-bold uppercase tracking-wider text-[#f2ff00]">La giornata in una frase</h2>
+            <p id="summary-headline" class="text-white text-base sm:text-lg font-semibold mt-1 leading-snug italic">
+              Caricamento in corso...
+            </p>
+            <p id="summary-text" class="text-slate-300 mt-2 leading-relaxed text-sm">
+              Generazione della sintesi in corso in base ai dati orari...
+            </p>
+          </div>
         </div>
-        <div class="flex-1 text-sm">
-          <h2 id="summary-title" class="text-xs font-bold uppercase tracking-wider text-[#f2ff00]">Sintesi meteorologica odierna</h2>
-          <p id="summary-text" class="text-slate-200 mt-1 leading-relaxed">
-            Generazione della sintesi in corso in base ai dati orari...
-          </p>
+      </section>
+
+      <!-- 3b. TROVA IL MIO MOMENTO -->
+      <section id="section-momento" aria-labelledby="momento-title" class="rounded-3xl p-5 sm:p-6 glass-card space-y-4">
+        <div class="flex items-center gap-2">
+          <i data-lucide="compass" class="w-5 h-5 text-[#f2ff00]" aria-hidden="true"></i>
+          <h2 id="momento-title" class="font-bold text-base sm:text-lg text-white">Trova il mio momento</h2>
+        </div>
+        <p class="text-xs text-slate-400">Scegli un'attività: ti suggerisco le finestre orarie migliori della giornata.</p>
+
+        <!-- Selezione attività -->
+        <div class="flex flex-wrap gap-2" role="group" aria-label="Seleziona attività">
+          <button type="button" class="btn-activity mobile-touch-target px-3 py-1.5 rounded-xl text-xs font-semibold glass-card interactive-control text-slate-200 flex items-center gap-1.5" data-activity="passeggiata">
+            <i data-lucide="footprints" class="w-3.5 h-3.5 text-emerald-400" aria-hidden="true"></i> Passeggiata
+          </button>
+          <button type="button" class="btn-activity mobile-touch-target px-3 py-1.5 rounded-xl text-xs font-semibold glass-card interactive-control text-slate-200 flex items-center gap-1.5" data-activity="corsa">
+            <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400" aria-hidden="true"></i> Corsa
+          </button>
+          <button type="button" class="btn-activity mobile-touch-target px-3 py-1.5 rounded-xl text-xs font-semibold glass-card interactive-control text-slate-200 flex items-center gap-1.5" data-activity="pranzo">
+            <i data-lucide="utensils" class="w-3.5 h-3.5 text-orange-400" aria-hidden="true"></i> Pranzo all'aperto
+          </button>
+          <button type="button" class="btn-activity mobile-touch-target px-3 py-1.5 rounded-xl text-xs font-semibold glass-card interactive-control text-slate-200 flex items-center gap-1.5" data-activity="foto">
+            <i data-lucide="camera" class="w-3.5 h-3.5 text-purple-400" aria-hidden="true"></i> Fotografia
+          </button>
+          <button type="button" class="btn-activity mobile-touch-target px-3 py-1.5 rounded-xl text-xs font-semibold glass-card interactive-control text-slate-200 flex items-center gap-1.5" data-activity="bucato">
+            <i data-lucide="wind" class="w-3.5 h-3.5 text-sky-400" aria-hidden="true"></i> Stendere il bucato
+          </button>
+        </div>
+
+        <!-- Risultato suggerimento -->
+        <div id="momento-result" class="hidden rounded-2xl p-4 bg-[#f2ff00]/8 border border-[#f2ff00]/20 text-sm space-y-2">
+          <p id="momento-suggestion" class="text-white font-medium leading-relaxed"></p>
+          <div id="momento-criteria" class="text-xs text-slate-400 border-t border-white/10 pt-2 mt-1"></div>
+        </div>
+        <div id="momento-unavailable" class="hidden text-xs text-slate-400 italic">Dati orari non ancora disponibili per calcolare il momento ottimale.</div>
+      </section>
+
+      <!-- 3c. TIMELINE DEGLI EVENTI DELLA GIORNATA -->
+      <section id="section-timeline" aria-labelledby="timeline-title" class="rounded-3xl p-5 sm:p-6 glass-card space-y-4">
+        <div class="flex items-center gap-2">
+          <i data-lucide="git-branch" class="w-5 h-5 text-[#2690fd]" aria-hidden="true"></i>
+          <h2 id="timeline-title" class="font-bold text-base sm:text-lg text-white">Cosa cambierà oggi</h2>
+          <span class="text-xs text-slate-400 ml-auto">Sequenza degli eventi principali</span>
+        </div>
+        <div id="timeline-container" class="relative pl-6 space-y-0">
+          <!-- Popolato dinamicamente -->
+          <div class="text-xs text-slate-400 italic">Caricamento timeline...</div>
         </div>
       </section>
 
